@@ -1,10 +1,18 @@
-# :trophy: Capstone Project
+# :trophy: Data Engineering Capstone Project
 description...
 
 # Purpose
 The purpose of the data engineering capstone project is to give you a chance to combine what you've learned throughout the program. This project will be an important part of your portfolio that will help you achieve your data engineering-related career goals.
 
 In this project, you can choose to complete the project provided for you, or define the scope and data for a project of your own design. Either way, you'll be expected to go through the same steps outlined below.
+
+# Step 1 | Scope the Project and Gather Data
+
+## Scope of the Project
+...
+
+## Datasets
+...
 
 # Getting Started
 This capstone project is designed to be executable on all platforms by taking advantage of Docker containers and thus requires the user to follow these prelimiary steps:
@@ -20,7 +28,16 @@ This capstone project is designed to be executable on all platforms by taking ad
 
 3. **Dockerfile** | After placing the JAVA JDK 8 (from the previous step) into the `/config` directory, update the `Dockerfile` on line 3 with the correct JDK version (illustrated by the XXX in step 2). Java JDK 8u251 was used during the development of this project, but a newer version might be found on the Oracle pages.
 
-4. **Datasets** | The IoT-23 dataset will be downloaded and extracted directly within the Docker container to avoid extensive usage of disk space, while the support datasets ([GeoLite2-ASN-CSV_20200519](https://drive.google.com/open?id=1m98iEZsxM8X0jd6yv2N3P2Of8BOpuhbG) and [GeoLite2-City-CSV_20200519](https://drive.google.com/open?id=1EL-l0GiRB3PzFazXoNAfIdHHtGUP5bqP)) are to be downloaded and extracted into the `/datasets` directory. 
+4. **Datasets** | The IoT-23 dataset will be downloaded and extracted directly within the Docker container to avoid extensive usage of disk space, while the support datasets ([GeoLite2-ASN-CSV_20200519](https://drive.google.com/open?id=1m98iEZsxM8X0jd6yv2N3P2Of8BOpuhbG) and [GeoLite2-City-CSV_20200519](https://drive.google.com/open?id=1EL-l0GiRB3PzFazXoNAfIdHHtGUP5bqP)) are to be downloaded and extracted into the `/datasets` directory.
+
+## Launch the Project
+After all the prelimiary steps above are completed, the project can be started by running the following command in the terminal:
+
+```
+ >> docker-compose up
+```
+
+This command triggers the download and execute process for the three Docker containers configured for this project.
 
 # Cleaning Up
 Once the project has been successfully ran, one can clean up the cluttered files on the system by running the following commands in the terminal.
