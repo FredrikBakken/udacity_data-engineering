@@ -1,5 +1,7 @@
 FROM puckel/docker-airflow:1.10.9
 
+ARG JAVA_VERSION=251
+
 USER root
 
 RUN update-ca-certificates -f \
@@ -13,13 +15,13 @@ RUN update-ca-certificates -f \
   && apt-get clean
 
 # Java
-COPY ./config/jdk-8u251-linux-x64.tar.gz /opt/jdk-8.tar.gz
+COPY ./config/jdk-8u${JAVA_VERSION}-linux-x64.tar.gz /opt/jdk-8.tar.gz
 RUN cd /opt/ \
     && tar xzf jdk-8.tar.gz \
     && rm jdk-8.tar.gz \
-    && update-alternatives --install /usr/bin/java java /opt/jdk1.8.0_251/bin/java 100 \
-    && update-alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_251/bin/jar 100 \
-    && update-alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_251/bin/javac 100
+    && update-alternatives --install /usr/bin/java java /opt/jdk1.8.0_${JAVA_VERSION}/bin/java 100 \
+    && update-alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_${JAVA_VERSION}/bin/jar 100 \
+    && update-alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_${JAVA_VERSION}/bin/javac 100
 
 # SPARK
 RUN cd /usr/ \
