@@ -1,0 +1,26 @@
+version: '3'
+services:
+  postgres:
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_USER=udacity
+      - POSTGRES_PASSWORD=udacity
+      - POSTGRES_DB=capstone_project
+    ports:
+      - 5432:5432
+    container_name: data-warehouse
+
+  datascience-notebook:
+    image: jupyter/datascience-notebook
+    volumes:
+      - "./notebooks:/home/jovyan/notebooks"
+    ports:
+      - 8888:8888
+    container_name: visual-analytics
+
+  airflow-spark245:
+    depends_on:
+      - postgres
+      - datascience-notebook
+    build: .
+    container_name: data-engineering
