@@ -11,16 +11,16 @@ This capstone project is designed to be executable on all platforms by taking ad
 
 1. **Docker** | Make sure that your system has Docker installed by running `docker` in the terminal. If Docker is not installed on your system, follow the instructions here: https://docs.docker.com/desktop/ for Mac/Windows installations. For Linux machines, run the following commands in the terminal:
 ```
-sudo apt install docker.io
-sudo apt install docker-compose
-sudo apt update
+ >> sudo apt install docker.io
+ >> sudo apt install docker-compose
+ >> sudo apt update
 ```
 
 2. **Java JDK** | The Java JDK file `jdk-8uXXX-linux-x64.tar.gz` (XXX represents the version) is necessary for the installation of Apache Spark within the Docker container. Download this file and place it within the `/config` directory in this project. You can find the latest Java JDK 8 here: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html.
 
-3. **Dockerfile** | After placing the JAVA JDK 8 in the previous step into the `/config` directory, update the `Dockerfile` on line 3 with the correct JDK version (illustrated by the XXX in step 2). Java JDK 8u251 was used during the development of this project, but a newer version might be found on the Oracle pages.
+3. **Dockerfile** | After placing the JAVA JDK 8 (from the previous step) into the `/config` directory, update the `Dockerfile` on line 3 with the correct JDK version (illustrated by the XXX in step 2). Java JDK 8u251 was used during the development of this project, but a newer version might be found on the Oracle pages.
 
-4. **Datasets** | todo...
+4. **Datasets** | The IoT-23 dataset will be downloaded and extracted directly within the Docker container to avoid extensive usage of disk space, while the support datasets ([GeoLite2-ASN-CSV_20200519](https://drive.google.com/open?id=1m98iEZsxM8X0jd6yv2N3P2Of8BOpuhbG) and [GeoLite2-City-CSV_20200519](https://drive.google.com/open?id=1EL-l0GiRB3PzFazXoNAfIdHHtGUP5bqP)) are to be downloaded and extracted into the `/datasets` directory. 
 
 # Cleaning Up
 Once the project has been successfully ran, one can clean up the cluttered files on the system by running the following commands in the terminal.

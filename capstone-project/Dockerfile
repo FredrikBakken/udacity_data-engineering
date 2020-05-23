@@ -51,7 +51,6 @@ ADD ./dags/ /usr/local/airflow/dags
 RUN mkdir /usr/local/airflow/datasets
 ADD ./datasets/GeoLite2-ASN-CSV_20200519 /usr/local/airflow/datasets/GeoLite2-ASN-CSV_20200519
 ADD ./datasets/GeoLite2-City-CSV_20200519 /usr/local/airflow/datasets/GeoLite2-City-CSV_20200519
-ADD ./datasets/GeoLite2-Country-CSV_20200519 /usr/local/airflow/datasets/GeoLite2-Country-CSV_20200519
 RUN cd /usr/local/airflow/datasets \
     && wget --no-check-certificate "https://mcfp.felk.cvut.cz/publicDatasets/IoT-23-Dataset/iot_23_datasets_small.tar.gz" \
     && tar xzf iot_23_datasets_small.tar.gz \

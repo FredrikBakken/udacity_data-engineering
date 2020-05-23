@@ -1,3 +1,4 @@
 *.tar.gz
 
-capstone-project/datasets/**
+capstone-project/datasets/GeoLite2-ASN-CSV_20200519/**
+capstone-project/datasets/GeoLite2-City-CSV_20200519/**
