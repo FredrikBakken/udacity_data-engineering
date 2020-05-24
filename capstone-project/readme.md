@@ -12,6 +12,15 @@ In this project, you can choose to complete the project provided for you, or def
 ...
 
 ## Datasets
+This project looks into engineering data from the [IoT-23 dataset](https://www.stratosphereips.org/datasets-iot23), *a labeled dataset with malicious and benign IoT network traffic*, and two support datasets from MaxMind's [GeoIP2 databases](https://dev.maxmind.com/geoip/geoip2/geolite2/), with correlated IP-information about geographical locations and ASNs.
+
+1. ...
+
+> "IoT-23 is a new dataset of network traffic from Internet of Things (IoT) devices. It has 20 malware captures executed in IoT devices, and 3 captures for benign IoT devices traffic. It was first published in January 2020, with captures ranging from 2018 to 2019. This IoT network traffic was captured in the Stratosphere Laboratory, AIC group, FEL, CTU University, Czech Republic. Its goal is to offer a large dataset of real and labeled IoT malware infections and IoT benign traffic for researchers to develop machine learning algorithms. This dataset and its research is funded by Avast Software, Prague." - https://www.stratosphereips.org/datasets-iot23
+
+2. ...
+
+# Step 2 | Explore and Assess the Data
 ...
 
 # Getting Started
@@ -37,12 +46,12 @@ After all the prelimiary steps above are completed, the project can be started b
  >> docker-compose up
 ```
 
-This command triggers the download and execute process for the three Docker containers configured for this project.
+**WARNING:** This command triggers the download and execution process for the three Docker containers configured for this project, which means that there has to be a minimum of ~50GB of available disk space on the user's machine.
 
 # Cleaning Up
 Once the project has been successfully ran, one can clean up the cluttered files on the system by running the following commands in the terminal.
 
-**WARNING:** Be aware that this will delete *ALL* Docker images and running containers on your system. DO NOT run these commands if there already exists Docker images/containers on your system which you want to keep.
+**WARNING:** This will delete *ALL* Docker images and running containers on your system. DO NOT run these commands if there already exists Docker images/containers on your system which you want to keep.
 
 ```
 docker stop $(docker ps -aq)
