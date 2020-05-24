@@ -35,9 +35,7 @@ This capstone project is designed to be executable on all platforms by taking ad
 
 2. **Java JDK** | The Java JDK file `jdk-8uXXX-linux-x64.tar.gz` (XXX represents the version) is necessary for the installation of Apache Spark within the Docker container. Download this file and place it within the `/config` directory in this project. You can find the latest Java JDK 8 here: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html.
 
-3. **Dockerfile** | After placing the JAVA JDK 8 (from the previous step) into the `/config` directory, update the `Dockerfile` on line 3 with the correct JDK version (illustrated by the XXX in step 2). Java JDK 8u251 was used during the development of this project, but a newer version might be found on the Oracle pages.
-
-4. **Datasets** | The IoT-23 dataset will be downloaded and extracted directly within the Docker container to avoid extensive usage of disk space, while the support datasets ([GeoLite2-ASN-CSV_20200519](https://drive.google.com/open?id=1m98iEZsxM8X0jd6yv2N3P2Of8BOpuhbG) and [GeoLite2-City-CSV_20200519](https://drive.google.com/open?id=1EL-l0GiRB3PzFazXoNAfIdHHtGUP5bqP)) are to be downloaded and extracted into the `/datasets` directory.
+3. **Dockerfile** | After placing the JAVA JDK 8 (from the previous step) into the `/config` directory, update the `Dockerfile` on line 3 with the correct JDK version (illustrated by the XXX in step 2). Java JDK 8u251 was used during the development of this project, but a newer version might be found on the [Oracle pages](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html).
 
 ## Launch the Project
 After all the prelimiary steps above are completed, the project can be started by running the following command in the terminal:

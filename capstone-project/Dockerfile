@@ -40,18 +40,23 @@ RUN mkdir -p /usr/spark/work/ \
 
 ENV SPARK_MASTER_PORT 7077
 
-# Postgres
+# Install necessary Python libraries
 RUN pip install --upgrade pip \
-    && pip install psycopg2-binary
+    && pip install psycopg2-binary \
+    && pip install gdown
 
 # Add DAGs to Airflow UI
 ADD ./dags/ /usr/local/airflow/dags
 
 # Add datasets to the project
-RUN mkdir /usr/local/airflow/datasets
-ADD ./datasets/GeoLite2-ASN-CSV_20200519 /usr/local/airflow/datasets/GeoLite2-ASN-CSV_20200519
-ADD ./datasets/GeoLite2-City-CSV_20200519 /usr/local/airflow/datasets/GeoLite2-City-CSV_20200519
-RUN cd /usr/local/airflow/datasets \
+RUN mkdir /usr/local/airflow/datasets \
+    && cd /usr/local/airflow/datasets \
+    && gdown "https://drive.google.com/uc?id=1vcBa2iFGgSA4Gf3wCk2a7vHCphu03xDl" \
+    && tar xf GeoLite2-ASN-CSV_20200519.tar.xz \
+    && rm GeoLite2-ASN-CSV_20200519.tar.xz \
+    && gdown "https://drive.google.com/uc?id=1ufDqmL3L5SK3d_2c8gDS6yh6Z-VFFOYw" \
+    && tar xf GeoLite2-City-CSV_20200519.tar.xz \
+    && rm GeoLite2-City-CSV_20200519.tar.xz \
     && wget --no-check-certificate "https://mcfp.felk.cvut.cz/publicDatasets/IoT-23-Dataset/iot_23_datasets_small.tar.gz" \
     && tar xzf iot_23_datasets_small.tar.gz \
     && rm iot_23_datasets_small.tar.gz
