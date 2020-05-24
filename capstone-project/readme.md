@@ -9,16 +9,18 @@ In this project, you can choose to complete the project provided for you, or def
 # Step 1 | Scope the Project and Gather Data
 
 ## Scope of the Project
-...
+The capstone project for my journey through the Udacity Data Engineering course looks into creating a data pipeline by using the IoT-23 dataset by Stratosphere Laboratory and enriching the dataset with IP related information from two other datasets, *ASN* ([autonomous system number](https://en.wikipedia.org/wiki/Autonomous_system_(Internet))) and *City*, by MaxMind. It is built using a Docker container environment for simple scaling and deployment to *any* platform.
 
 ## Datasets
 This project looks into engineering data from the [IoT-23 dataset](https://www.stratosphereips.org/datasets-iot23), *a labeled dataset with malicious and benign IoT network traffic*, and two support datasets from MaxMind's [GeoIP2 databases](https://dev.maxmind.com/geoip/geoip2/geolite2/), with correlated IP-information about geographical locations and ASNs.
 
-1. ...
+1. The IoT-23 dataset is used as the baseline for this project, which includes PCAP-data with attached labels that describes the corresponding malware or benign information. In total the dataset contains 764,308,000 packets that has been captured between 2018 to 2019.
 
 > "IoT-23 is a new dataset of network traffic from Internet of Things (IoT) devices. It has 20 malware captures executed in IoT devices, and 3 captures for benign IoT devices traffic. It was first published in January 2020, with captures ranging from 2018 to 2019. This IoT network traffic was captured in the Stratosphere Laboratory, AIC group, FEL, CTU University, Czech Republic. Its goal is to offer a large dataset of real and labeled IoT malware infections and IoT benign traffic for researchers to develop machine learning algorithms. This dataset and its research is funded by Avast Software, Prague." - https://www.stratosphereips.org/datasets-iot23
 
-2. ...
+2. The [MaxMind ASN](https://dev.maxmind.com/geoip/geoip2/geolite2-asn-csv-database/) database is used to enrich the IoT-23 dataset with information about organizations potentially associated with the IP-addresses found.
+
+3. The [MaxMind City](https://dev.maxmind.com/geoip/geoip2/geolite2/) database is used to enrich the IoT-23 dataset with information about geolocation information such as country and city associated with the IP-addresses found.
 
 # Step 2 | Explore and Assess the Data
 ...
@@ -78,7 +80,7 @@ Docker containers are spun up to run in their own [network environments](https:/
 | ab818bc6e69c | bridge                   | bridge | local |
 | 66372c0553ca | capstone-project_default | bridge | local |
 
-After finding the *NETWORK ID* for the **capstone-project_default**, use it to find the IPv4 hosts for the three containers in the project by running `docker network inspect <network ID>` (in this example the command is `docker network inspect 66372c0553ca`). The output in the terminal is a JSON-formatted description of the Docker container network, where the interesting part can be found within the "Containers"-part:
+After finding the *NETWORK ID* for the **capstone-project_default**, use it to find the IPv4 hosts for the three containers in the project by running `docker network inspect <network ID>` (in this example the command is `docker network inspect 66372c0553ca`). The output in the terminal is a JSON-formatted description of the Docker container network, where the interesting part can be found within the "Containers"-section:
 
 ```
 "Containers": {
