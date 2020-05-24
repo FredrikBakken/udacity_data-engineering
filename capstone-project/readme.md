@@ -1,5 +1,4 @@
 # :trophy: Data Engineering Capstone Project
-description...
 
 # Purpose
 The purpose of the data engineering capstone project is to give you a chance to combine what you've learned throughout the program. This project will be an important part of your portfolio that will help you achieve your data engineering-related career goals.
@@ -23,6 +22,51 @@ This project looks into engineering data from the [IoT-23 dataset](https://www.s
 3. The [MaxMind City](https://dev.maxmind.com/geoip/geoip2/geolite2/) database is used to enrich the IoT-23 dataset with information about geolocation information such as country and city associated with the IP-addresses found.
 
 # Step 2 | Explore and Assess the Data
+
+## Data Exploration
+In order to explore the contents of the datasets, they have to be downloaded locally and opened. Download links for each of the datasets can be found below:
+
+- IoT-23: https://mcfp.felk.cvut.cz/publicDatasets/IoT-23-Dataset/iot_23_datasets_small.tar.gz
+- MaxMind ASN: https://drive.google.com/open?id=1vcBa2iFGgSA4Gf3wCk2a7vHCphu03xDl
+- MaxMind City: https://drive.google.com/open?id=1ufDqmL3L5SK3d_2c8gDS6yh6Z-VFFOYw
+
+After exploring the contents of the datasets, we can delete them since the Docker container is configured to take care of downloading and extracting all the necessary files automatically.
+
+### IoT-23
+The **IoT-23 dataset** contains 23 sub-directories with network packages, categorized as either *Honeypot* or *Malware* captures. This project will focus on only looking into the network packages found in the *Malware* directories. The files also includes some commented lines at the start and one commented out line in the end, as illustrated below:
+
+```
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	conn
+#open	2019-03-15-14-50-49
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	proto	service	duration	orig_bytes	resp_bytes	conn_state	local_orig	local_resp	missed_bytes	history	orig_pkts	orig_ip_bytes	resp_pkts	resp_ip_bytes	tunnel_parents   label   detailed-label
+#types	time	string	addr	port	addr	port	enum	string	interval	count	count	string	bool	bool	count	string	count	count	count	count	set[string]   string   string
+1545403816.962094	CrDn63WjJEmrWGjqf	192.168.1.195	41040	185.244.25.235	80	tcp	-	3.139211	0	0	S0	-	-	0	S	3	180	0	0	-   Benign   -
+1545403824.181240	CY9lJW3gh1Eje4usP6	192.168.1.195	41040	185.244.25.235	80	tcp	-	-	-	-	S0	-	-	0	S	1	60	0	0	-   Benign   -
+...
+1545490181.542213	CuXpFN3fWesWBXUhq1	192.168.1.195	123	82.113.53.40	123	udp	-	-	-	-	S0	-	-	0	D	1	76	0	0	-   Benign   -
+1545490198.459568	Ct2Yhy4d33oL3yyZY9	192.168.1.195	123	89.221.210.188	123	udp	-	-	-	-	S0	-	-	0	D	1	76	0	0	-   Benign   -
+#close	2019-03-15-14-50-54
+```
+
+By studying the structured lines of the files, it is possible to find that the delimiter is `\t`, while the last column can be split by three spaces. We are also given the header name for each column and the data type from the commented lines above the data.
+
+### MaxMind ASN
+The **MaxMind ASN dataset** contains a CSV file with information about network (IPv4) and the corresponding ASN and organization. It only includes a descriptive header and three columns with data, which will be used to enrich the IoT-23 dataset.
+
+### MaxMind City
+The **MaxMind City dataset** contains two CSV files, the first containing the IPv4-blocks and geolocations, and the second containing support information such as continent, country, city name, and time zone. They contain a descriptive header and multiple structured columns with data, which will be used to enrich the IoT-23 dataset.
+
+## Data Cleaning
+...
+
+# Step 3 | Define the Data Model
+...
+
+# Step 4 | Run ETL to Model the Data
 ...
 
 # Get Started
@@ -121,3 +165,20 @@ docker stop $(docker ps -aq)
 docker rm -vf $(docker ps -a -q)
 docker rmi -f $(docker images -a -q)
 ```
+
+# Step 5 | Complete Project Write Up
+
+## Questions & Answers
+1. **What's the goal?**<br/><br/>...<br/><br/><br/>
+2. **What queries will you want to run?**<br/><br/>...<br/><br/><br/>
+3. **How would Spark or Airflow be incorporated?**<br/><br/>...<br/><br/><br/>
+4. **Why did you choose the model you chose?**<br/><br/>...<br/><br/><br/>
+5. **State the rationale for the choice of tools and technologies for the project.**<br/><br/>...<br/><br/><br/>
+6. **How often the data should be updated and why?**<br/><br/>...<br/><br/><br/>
+
+## Scenarios
+How would you approach the problem differently under the following scenarios?
+
+1. **If the data was increased by 100x.**<br/><br/>...<br/><br/><br/>
+2. **If the pipelines were run on a daily basis by 7am.**<br/><br/>...<br/><br/><br/>
+3. **If the database needed to be accessed by 100+ people.**<br/><br/>...<br/><br/><br/>
