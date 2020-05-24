@@ -33,7 +33,7 @@ In order to explore the contents of the datasets, they have to be downloaded loc
 After exploring the contents of the datasets, we can delete them since the Docker container is configured to take care of downloading and extracting all the necessary files automatically.
 
 ### IoT-23
-The **IoT-23 dataset** contains 23 sub-directories with network packages, categorized as either *Honeypot* or *Malware* captures. This project will focus on only looking into the network packages found in the *Malware* directories. The files also includes some commented lines at the start and one commented out line in the end, as illustrated below:
+The **IoT-23 dataset** contains 23 sub-directories with network packages, categorized as either *Honeypot* or *Malware* captures. This project will focus on only looking into the network packages found in the *Malware* directories. The files also includes some commented lines (starting with #) at the start and one commented out line in the end, as illustrated below:
 
 ```
 #separator \x09
@@ -52,7 +52,7 @@ The **IoT-23 dataset** contains 23 sub-directories with network packages, catego
 #close	2019-03-15-14-50-54
 ```
 
-By studying the structured lines of the files, it is possible to find that the delimiter is `\t`, while the last column can be split by three spaces. We are also given the header name for each column and the data type from the commented lines above the data.
+By studying the structured lines of the files, it is possible to find that the delimiter is `\t`, while the last column can be split into new columns by the three spaces. We are also given the header name for each column and the data type from the commented lines above the data.
 
 ### MaxMind ASN
 The **MaxMind ASN dataset** contains a CSV file with information about network (IPv4) and the corresponding ASN and organization. It only includes a descriptive header and three columns with data, which will be used to enrich the IoT-23 dataset.
@@ -61,9 +61,16 @@ The **MaxMind ASN dataset** contains a CSV file with information about network (
 The **MaxMind City dataset** contains two CSV files, the first containing the IPv4-blocks and geolocations, and the second containing support information such as continent, country, city name, and time zone. They contain a descriptive header and multiple structured columns with data, which will be used to enrich the IoT-23 dataset.
 
 ## Data Cleaning
-...
+From the data exploration phase, it is clear that the data found in the IoT-23 dataset needs to be cleaned by removing the commented lines. Since this dataset also includes network captures from IoT devices over a time periode, it is possible to use the timestamp value found in the `time` column to split the dataset by days. This makes it possible for us to simulate a summary of daily packets, which can be processed by a daily schedule using Apache Airflow.
+
+The data found in the MaxMind datasets does not need further cleaning.
 
 # Step 3 | Define the Data Model
+
+## Data Model
+...
+
+## Data Pipeline
 ...
 
 # Step 4 | Run ETL to Model the Data
