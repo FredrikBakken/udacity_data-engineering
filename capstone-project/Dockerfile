@@ -48,8 +48,10 @@ RUN pip install --upgrade pip \
 # Add DAGs to Airflow UI
 ADD ./dags/ /usr/local/airflow/dags
 
+# TODO: Remove
+ADD ./datasets /usr/local/airflow/datasets
+
 # Add datasets to the project
-RUN mkdir /usr/local/airflow/datasets
 #RUN mkdir /usr/local/airflow/datasets \
 #    && cd /usr/local/airflow/datasets \
 #    && gdown "https://drive.google.com/uc?id=1vcBa2iFGgSA4Gf3wCk2a7vHCphu03xDl" \
@@ -62,10 +64,8 @@ RUN mkdir /usr/local/airflow/datasets
 #    && tar xzf iot_23_datasets_small.tar.gz \
 #    && rm iot_23_datasets_small.tar.gz
 
-# Experiments
-RUN mkdir /usr/local/airflow/datasets/experiments
-ADD ./experiments/ /usr/local/airflow/datasets/experiments
+# Experiments - TODO: Remove
+#RUN mkdir /usr/local/airflow/datasets/experiments
+#ADD ./experiments/ /usr/local/airflow/datasets/experiments
 
-# User must be root to execute file manipulation
 USER root
-# USER airflow

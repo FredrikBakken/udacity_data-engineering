@@ -1,7 +1,11 @@
 import os
 import pyspark
+import pyspark.sql.functions as F
 
 from shutil import rmtree
+
+from pyspark.sql import SparkSession
+from pyspark.sql.types import *
 
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -30,7 +34,7 @@ default_args = {
     # 'on_retry_callback': another_function,
     # 'sla_miss_callback': yet_another_function,
     # 'trigger_rule': 'all_success'
-    # 'provide_context': True,
+    'is_paused_upon_creation': False,
 }
 
 dag = DAG(
@@ -44,6 +48,7 @@ dag = DAG(
 # ########################################################################
 
 
+# Fixed variables shared over multiple tasks
 path_raw_dataset = "/usr/local/airflow/datasets/opt"
 path_cleaned_dataset = "/usr/local/airflow/datasets/iot-23"
 
@@ -80,19 +85,132 @@ def remove_partially_cleaned(**kwargs):
     print("Removing the partially cleaned dataset completed!")
 
 
-def clean_the_dataset(**kwargs):
-    print("Clean the dataset")
-    # Using Apache Spark
-    
-    print(kwargs)
+def remove_honeypot_captures(**kwargs):
     ti = kwargs['ti']
-    print(ti)
     status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
-    print(status_code)
+
+    if (status_code == 1):
+        print("The raw dataset has already been cleaned!")
+        return 0
+
+    print("Removing the honeypot captures from the raw dataset...")
+    path_captures = os.path.join(path_raw_dataset, "Malware-Project/BigDataset/IoTScenarios")
+    path_honeypot_capture_4_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-4-1")
+    path_honeypot_capture_5_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-5-1")
+    path_honeypot_capture_7_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-7-1")
+
+    rmtree(path_honeypot_capture_4_1)
+    rmtree(path_honeypot_capture_5_1)
+    rmtree(path_honeypot_capture_7_1)
+
+    print("Removing the honeypot captures from the raw dataset completed!")
+
+
+def remove_commented_lines(**kwargs):
+    ti = kwargs['ti']
+    status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
+
+    if (status_code == 1):
+        print("The raw dataset has already been cleaned!")
+        return 0
+
+    print("Removing commented lines in the raw dataset files...")
+
+    for root, dirs, files in os.walk(path_raw_dataset):
+        for filename in files:
+            absolute_path = os.path.abspath(os.path.join(root, filename))
+            bash_command = "sed -i '/^#/d' " + absolute_path
+            os.system(bash_command)
+
+    print("Removing commented lines in the raw dataset files completed!")
+
+
+def clean_the_dataset(**kwargs):
+    ti = kwargs['ti']
+    status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
+
+    if (status_code == 1):
+        print("The raw dataset has already been cleaned!")
+        return 0
+
+    print("Cleaning the dataset...")
+
+    packet_schema = StructType([
+        StructField("ts", StringType(), True),
+        StructField("uid", StringType(), True),
+        StructField("orig_host", StringType(), True),
+        StructField("orig_port", StringType(), True),
+        StructField("resp_host", StringType(), True),
+        StructField("resp_port", StringType(), True),
+        StructField("protocol", StringType(), True),
+        StructField("service", StringType(), True),
+        StructField("duration", StringType(), True),
+        StructField("orig_bytes", StringType(), True),
+        StructField("resp_bytes", StringType(), True),
+        StructField("conn_state", StringType(), True),
+        StructField("local_orig", StringType(), True),
+        StructField("local_resp", StringType(), True),
+        StructField("missed_bytes", StringType(), True),
+        StructField("history", StringType(), True),
+        StructField("orig_pkts", StringType(), True),
+        StructField("orig_ip_bytes", StringType(), True),
+        StructField("resp_pkts", StringType(), True),
+        StructField("resp_ip_bytes", StringType(), True),
+        StructField("tunnel_parents", StringType(), True),
+    ])
+
+    print("Getting or creating a Spark Session")
+    spark = SparkSession \
+        .builder \
+        .appName("Dataset Cleaner") \
+        .getOrCreate()
+    
+    for root, dirs, files in os.walk(path_raw_dataset):
+        for filename in files:
+            absolute_path = os.path.abspath(os.path.join(root, filename))
+            print("Starting the cleaning process of file: " + absolute_path)
+
+            df = spark \
+                .read \
+                .option("delimiter", "\t") \
+                .schema(packet_schema) \
+                .csv(absolute_path)
+
+            df.printSchema()
+
+            df = df.withColumn("timestamp", F.split(df.ts, "\.").getItem(0))
+            df = df.withColumn("date", F.to_date(F.from_unixtime(df.timestamp)))
+            df = df.withColumn("year", F.year(df.date)) \
+                .withColumn("month", F.month(df.date)) \
+                .withColumn("day", F.dayofmonth(df.date)) \
+                .drop("date")
+
+            df.show(10, truncate = False)
+
+            print("Saving the cleaned dataset")
+            df.repartition(df.year, df.month, df.day) \
+                .write \
+                .mode('append') \
+                .partitionBy("year", "month", "day") \
+                .parquet(path_cleaned_dataset)
+
+            print("Removing the raw dataset file: " + absolute_path)
+            os.remove(absolute_path)
+
+    print("Cleaning the dataset completed!")
 
 
 def remove_raw_dataset(**kwargs):
-    print("Remove the raw dataset")
+    ti = kwargs['ti']
+    status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
+
+    if (status_code != 1):
+        print("The raw dataset has already been cleaned!")
+        return 0
+
+    print("Removing the raw dataset...")
+    rmtree(path_raw_dataset)
+    print("Removing the raw dataset completed!")
 
 
 # ########################################################################
@@ -109,6 +227,20 @@ task_remove_partially_cleaned = PythonOperator(
     dag=dag,
     task_id='remove_partially_cleaned',
     python_callable=remove_partially_cleaned,
+    provide_context=True,
+)
+
+task_remove_honeypot_captures = PythonOperator(
+    dag=dag,
+    task_id='remove_honeypot_captures',
+    python_callable=remove_honeypot_captures,
+    provide_context=True,
+)
+
+task_remove_commented_lines = PythonOperator(
+    dag=dag,
+    task_id='remove_commented_lines',
+    python_callable=remove_commented_lines,
     provide_context=True,
 )
 
@@ -130,5 +262,7 @@ task_remove_raw_dataset = PythonOperator(
 # ########################################################################
 
 
-task_check_if_cleaned >> task_remove_partially_cleaned
-task_remove_partially_cleaned >> task_clean_the_dataset
+task_check_if_cleaned >> [task_remove_partially_cleaned, task_remove_honeypot_captures]
+[task_remove_partially_cleaned, task_remove_honeypot_captures] >> task_remove_commented_lines
+task_remove_commented_lines >> task_clean_the_dataset
+task_clean_the_dataset >> task_remove_raw_dataset
