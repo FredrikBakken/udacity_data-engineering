@@ -66,4 +66,6 @@ RUN mkdir /usr/local/airflow/datasets
 RUN mkdir /usr/local/airflow/datasets/experiments
 ADD ./experiments/ /usr/local/airflow/datasets/experiments
 
-USER airflow
+# User must be root to execute file manipulation
+USER root
+# USER airflow

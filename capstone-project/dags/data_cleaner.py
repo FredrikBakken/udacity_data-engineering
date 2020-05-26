@@ -1,6 +1,8 @@
 import os
 import pyspark
 
+from shutil import rmtree
+
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
@@ -42,16 +44,20 @@ dag = DAG(
 # ########################################################################
 
 
+path_raw_dataset = "/usr/local/airflow/datasets/opt"
+path_cleaned_dataset = "/usr/local/airflow/datasets/iot-23"
+
+
 def check_if_cleaned(**kwargs):
     print("Checking if the IoT-23 dataset has cleaned...")
 
-    path_dataset = os.path.exists("/usr/local/airflow/datasets/iot-23")
-    path_raw_dataset = os.path.exists("/usr/local/airflow/datasets/opt")
+    exists_cleaned_dataset = os.path.exists(path_cleaned_dataset)
+    exists_raw_dataset = os.path.exists(path_raw_dataset)
 
-    if (path_dataset is True and path_raw_dataset is False):
+    if (exists_cleaned_dataset is True and exists_raw_dataset is False):
         print("Good state: Cleaned dataset exists and raw dataset has been removed")
         kwargs['ti'].xcom_push(key='status_code', value=1)
-    elif (path_dataset is True and path_raw_dataset is True):
+    elif (exists_cleaned_dataset is True and exists_raw_dataset is True):
         print("Bad state: Cleaned dataset exists and raw dataset exists")
         kwargs['ti'].xcom_push(key='status_code', value=-1)
     else:
@@ -59,6 +65,19 @@ def check_if_cleaned(**kwargs):
         kwargs['ti'].xcom_push(key='status_code', value=0)
 
     print("Checking if the IoT-23 dataset has been cleaned completed!")
+
+
+def remove_partially_cleaned(**kwargs):
+    ti = kwargs['ti']
+    status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
+
+    if (status_code != -1):
+        print("Partially clean dataset does not exist.")
+        return 0
+    
+    print("Removing the partially cleaned dataset...")
+    rmtree(path_cleaned_dataset)
+    print("Removing the partially cleaned dataset completed!")
 
 
 def clean_the_dataset(**kwargs):
@@ -72,6 +91,9 @@ def clean_the_dataset(**kwargs):
     print(status_code)
 
 
+def remove_raw_dataset(**kwargs):
+    print("Remove the raw dataset")
+
 
 # ########################################################################
 
@@ -83,6 +105,13 @@ task_check_if_cleaned = PythonOperator(
     provide_context=True,
 )
 
+task_remove_partially_cleaned = PythonOperator(
+    dag=dag,
+    task_id='remove_partially_cleaned',
+    python_callable=remove_partially_cleaned,
+    provide_context=True,
+)
+
 task_clean_the_dataset = PythonOperator(
     dag=dag,
     task_id='clean_the_dataset',
@@ -90,8 +119,16 @@ task_clean_the_dataset = PythonOperator(
     provide_context=True,
 )
 
+task_remove_raw_dataset = PythonOperator(
+    dag=dag,
+    task_id='remove_raw_dataset',
+    python_callable=remove_raw_dataset,
+    provide_context=True,
+)
+
 
 # ########################################################################
 
 
-task_check_if_cleaned >> task_clean_the_dataset
+task_check_if_cleaned >> task_remove_partially_cleaned
+task_remove_partially_cleaned >> task_clean_the_dataset
