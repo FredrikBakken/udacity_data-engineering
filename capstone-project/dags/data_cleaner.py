@@ -62,27 +62,11 @@ def check_if_cleaned(**kwargs):
     if (exists_cleaned_dataset is True and exists_raw_dataset is False):
         print("Good state: Cleaned dataset exists and raw dataset has been removed")
         kwargs['ti'].xcom_push(key='status_code', value=1)
-    elif (exists_cleaned_dataset is True and exists_raw_dataset is True):
-        print("Bad state: Cleaned dataset exists and raw dataset exists")
-        kwargs['ti'].xcom_push(key='status_code', value=-1)
     else:
-        print("Bad state: Cleaned dataset does not exist and raw dataset exists")
+        print("Bad state: Cleaning is not executed/completed")
         kwargs['ti'].xcom_push(key='status_code', value=0)
 
     print("Checking if the IoT-23 dataset has been cleaned completed!")
-
-
-def remove_partially_cleaned(**kwargs):
-    ti = kwargs['ti']
-    status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
-
-    if (status_code != -1):
-        print("Partially clean dataset does not exist.")
-        return 0
-    
-    print("Removing the partially cleaned dataset...")
-    rmtree(path_cleaned_dataset)
-    print("Removing the partially cleaned dataset completed!")
 
 
 def remove_honeypot_captures(**kwargs):
@@ -229,13 +213,6 @@ task_check_if_cleaned = PythonOperator(
     provide_context=True,
 )
 
-task_remove_partially_cleaned = PythonOperator(
-    dag=dag,
-    task_id='remove_partially_cleaned',
-    python_callable=remove_partially_cleaned,
-    provide_context=True,
-)
-
 task_remove_honeypot_captures = PythonOperator(
     dag=dag,
     task_id='remove_honeypot_captures',
@@ -268,7 +245,7 @@ task_remove_raw_dataset = PythonOperator(
 # ########################################################################
 
 
-task_check_if_cleaned >> [task_remove_partially_cleaned, task_remove_honeypot_captures]
-[task_remove_partially_cleaned, task_remove_honeypot_captures] >> task_remove_commented_lines
+task_check_if_cleaned >> task_remove_honeypot_captures
+task_remove_honeypot_captures >> task_remove_commented_lines
 task_remove_commented_lines >> task_clean_the_dataset
 task_clean_the_dataset >> task_remove_raw_dataset

@@ -15,7 +15,7 @@ This project looks into engineering data from the [IoT-23 dataset](https://www.s
 
 1. The IoT-23 dataset is used as the baseline for this project, which includes PCAP-data with attached labels that describes the corresponding malware or benign information. In total the dataset contains 764,308,000 packets that has been captured between 2018 to 2019.
 
-> "IoT-23 is a new dataset of network traffic from Internet of Things (IoT) devices. It has 20 malware captures executed in IoT devices, and 3 captures for benign IoT devices traffic. It was first published in January 2020, with captures ranging from 2018 to 2019. This IoT network traffic was captured in the Stratosphere Laboratory, AIC group, FEL, CTU University, Czech Republic. Its goal is to offer a large dataset of real and labeled IoT malware infections and IoT benign traffic for researchers to develop machine learning algorithms. This dataset and its research is funded by Avast Software, Prague." - https://www.stratosphereips.org/datasets-iot23
+> "IoT-23 is a new dataset of network traffic from Internet of Things (IoT) devices. It has 20 malware captures executed in IoT devices, and 3 captures for benign IoT devices traffic. It was first published in January 2020, with captures ranging from 2018 to 2019. This IoT network traffic was captured in the Stratosphere Laboratory, AIC group, FEL, CTU University, Czech Republic. Its goal is to offer a large dataset of real and labeled IoT malware infections and IoT benign traffic for researchers to develop machine learning algorithms. This dataset and its research is funded by Avast Software, Prague." - [https://www.stratosphereips.org/datasets-iot23](https://www.stratosphereips.org/datasets-iot23)
 
 2. The [MaxMind ASN](https://dev.maxmind.com/geoip/geoip2/geolite2-asn-csv-database/) database is used to enrich the IoT-23 dataset with information about organizations potentially associated with the IP-addresses found.
 
@@ -26,9 +26,9 @@ This project looks into engineering data from the [IoT-23 dataset](https://www.s
 ## Data Exploration
 In order to explore the contents of the datasets, they have to be downloaded locally and opened. Download links for each of the datasets can be found below:
 
-- IoT-23: https://mcfp.felk.cvut.cz/publicDatasets/IoT-23-Dataset/iot_23_datasets_small.tar.gz
-- MaxMind ASN: https://drive.google.com/open?id=1vcBa2iFGgSA4Gf3wCk2a7vHCphu03xDl
-- MaxMind City: https://drive.google.com/open?id=1ufDqmL3L5SK3d_2c8gDS6yh6Z-VFFOYw
+- IoT-23: [https://mcfp.felk.cvut.cz/publicDatasets/IoT-23-Dataset/iot_23_datasets_small.tar.gz](https://mcfp.felk.cvut.cz/publicDatasets/IoT-23-Dataset/iot_23_datasets_small.tar.gz)
+- MaxMind ASN: [https://drive.google.com/open?id=1vcBa2iFGgSA4Gf3wCk2a7vHCphu03xDl](https://drive.google.com/open?id=1vcBa2iFGgSA4Gf3wCk2a7vHCphu03xDl)
+- MaxMind City: [https://drive.google.com/open?id=1ufDqmL3L5SK3d_2c8gDS6yh6Z-VFFOYw](https://drive.google.com/open?id=1ufDqmL3L5SK3d_2c8gDS6yh6Z-VFFOYw)
 
 After exploring the contents of the datasets, we can delete them since the Docker container is configured to take care of downloading and extracting all the necessary files automatically.
 
@@ -62,6 +62,16 @@ The **MaxMind City dataset** contains two CSV files, the first containing the IP
 
 ## Data Cleaning
 From the data exploration phase, it is clear that the data found in the IoT-23 dataset needs to be cleaned by removing the commented lines. Since this dataset also includes network captures from IoT devices over a time periode, it is possible to use the timestamp value found in the `ts` column to split the dataset by days. This makes it possible for us to simulate a summary of daily packets, which can be processed by a daily schedule using Apache Airflow.
+
+An [Airflow DAG](https://airflow.apache.org/docs/stable/concepts.html#dags) is therefore set up to handle the cleaning of the IoT-23 dataset, named **step-1_data-cleaner** (found in the dags/data_cleaner.py file). This DAG consists of five tasks that cleans and prepares the dataset:
+
+![Data Cleaning DAG](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-cleaner.png)
+
+1. **check_if_cleaned** | Checks the status of the cleaning process by looking at what dataset directories that exist and pushes the corresponding `status_code` to xcom. If only the cleaned dataset directory exist, then the `status_code` is set to `1`, and if only the raw dataset directory exist, then the `status_code` is set to `0`.
+2. **remove_honeypot_captures** | If the `status_code != 1`, then the honeypot sub-directories in the raw dataset directory are removed.
+3. **remove_commented_lines** | If the `status_code != 1`, then the commented lines (starts with #) in each file of the raw dataset are removed.
+4. **clean_the_dataset** | If the `status_code != 1`, then Apache Spark is used to extract each file in the raw dataset one at a time (to avoid extensive disk space usage of more than 100GB) into a DataFrame. It also applies some simple manipulation of the data by organizing the label information into new columns and adding columns for year, month, and day. Therefter it writes (appends) the results by repartitioning the by day into the cleaned `iot-23`-directory. At the end of each loop, it deleted the corresponding raw dataset file.
+5. **remove_raw_dataset** | Cleaning is finished by deleting the directory structure of the original raw dataset.
 
 The data found in the MaxMind datasets does not need further cleaning.
 
