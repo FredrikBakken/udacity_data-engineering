@@ -67,17 +67,19 @@ An [Airflow DAG](https://airflow.apache.org/docs/stable/concepts.html#dags) is t
 
 ![Data Cleaning DAG](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-cleaner.png)
 
-1. **check_if_cleaned** | Checks the status of the cleaning process by looking at what dataset directories that exist and pushes the corresponding `status_code` to xcom. If only the cleaned dataset directory exist, then the `status_code` is set to `1`, and if only the raw dataset directory exist, then the `status_code` is set to `0`.
-2. **remove_honeypot_captures** | If the `status_code != 1`, then the honeypot sub-directories in the raw dataset directory are removed.
-3. **remove_commented_lines** | If the `status_code != 1`, then the commented lines (starts with #) in each file of the raw dataset are removed.
-4. **clean_the_dataset** | If the `status_code != 1`, then [Apache Spark](https://spark.apache.org/) is used to extract each file in the raw dataset one at a time (to avoid extensive disk space usage of more than 100GB) into a DataFrame. It also applies some simple manipulation of the data by organizing the label information into new columns and adding columns for year, month, and day. Therefter it writes (appends) the results by repartitioning the by day into the cleaned `iot-23`-directory. At the end of each loop, it deleted the corresponding raw dataset file.
-5. **remove_raw_dataset** | Cleaning is finished by deleting the directory structure of the original raw dataset.
+1. **check_if_cleaned** | Checks the status of the cleaning process by looking at what dataset directories that exist and pushes the corresponding `status_code` to xcom. If only the cleaned dataset directory exist, then the `status_code` is set to `1`, and if both cleaned and raw, or only the raw dataset directory exist, then the `status_code` is set to `0`.
+2. **remove_honeypot_captures** | Removes the honeypot sub-directories from the raw dataset.
+3. **remove_commented_lines** | Removes the commented lines (starts with #) from the raw dataset.
+4. **clean_the_dataset** | Dataset is cleaned by using [Apache Spark](https://spark.apache.org/). Each file in the raw dataset is extracted one at a time with a `for`-loop (optimized to avoid extensive disk space usage of more than 100GB) into a DataFrame. The DataFrame is then updated by applying simple manipulations of the data, labelling information is added to new columns and columns for year, month, and day are also added. Once the lazy evaluation functions are defined, the DataFrame is repartitioned by using the new date columns and written (appended) into the cleaned `iot-23`-directory. Finally, the raw dataset file processed in each loop is deleted.
+5. **remove_raw_dataset** | Cleaning is finalized by deleting the directory structure of the original raw dataset.
 
 The data found in the MaxMind datasets does not need further cleaning.
 
 # Step 3 | Define the Data Model
 
 ## Data Model
+The data model that is used for this project is a snowflake schema, since *City Blocks* contains two geoname IDs for each row towards different locations. Had there only been a single geoname ID, then a star schema would have been the best approach.
+
 ![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 
 ## Data Pipeline
@@ -91,14 +93,14 @@ The data found in the MaxMind datasets does not need further cleaning.
 ## Preliminary Steps
 This capstone project is designed to be executable on all platforms by taking advantage of Docker containers and thus requires the user to follow these prelimiary steps:
 
-1. **Docker** | Make sure that your system has Docker installed by running `docker` in the terminal. If Docker is not installed on your system, follow the instructions here: https://docs.docker.com/desktop/ for Mac/Windows installations. For Linux machines, run the following commands in the terminal:
+1. **Docker** | Make sure that your system has Docker installed by running `docker` in the terminal. If Docker is not installed on your system, follow the instructions here: [https://docs.docker.com/desktop/](https://docs.docker.com/desktop/) for Mac/Windows installations. For Linux machines, run the following commands in the terminal:
 ```
  >> sudo apt install docker.io
  >> sudo apt install docker-compose
  >> sudo apt update
 ```
 
-2. **Java JDK** | The Java JDK file `jdk-8uXXX-linux-x64.tar.gz` (XXX represents the version) is necessary for the installation of Apache Spark within the Docker container. Download this file and place it within the `/config` directory in this project. You can find the latest Java JDK 8 here: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html.
+2. **Java JDK** | The Java JDK file `jdk-8uXXX-linux-x64.tar.gz` (XXX represents the version) is necessary for the installation of Apache Spark within the Docker container. Download this file and place it within the `/config` directory in this project. You can find the latest Java JDK 8 here: [https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html]().
 
 3. **Dockerfile** | After placing the JAVA JDK 8 (from the previous step) into the `/config` directory, update the `Dockerfile` on line 3 with the correct JDK version (illustrated by the XXX in step 2). Java JDK 8u251 was used during the development of this project, but a newer version might be found on the [Oracle pages](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html).
 
@@ -131,7 +133,7 @@ visual-analytics        | [I 10:46:28.366 NotebookApp] http://bf864eca62af:8888/
 visual-analytics        | [I 10:46:28.366 NotebookApp]  or http://127.0.0.1:8888/?token=aec84158afbad9a31c63cadfa9e2cc78e67b04231a60ed4b
 ```
 
-Copy the URL found (in this case: http://127.0.0.1:8888/?token=aec84158afbad9a31c63cadfa9e2cc78e67b04231a60ed4b) into your favorite browser to open the Jupyter Notebook.
+Copy the URL found (in this case: [http://127.0.0.1:8888/?token=aec84158afbad9a31c63cadfa9e2cc78e67b04231a60ed4b](http://127.0.0.1:8888/?token=aec84158afbad9a31c63cadfa9e2cc78e67b04231a60ed4b)) into your favorite browser to open the Jupyter Notebook.
 
 ### Apache Airflow
 Docker containers are spun up to run in their own [network environments](https://docker-curriculum.com/#docker-network), which can be accessed by using the exposed ports. You can find the network ID of the current docker-compose project by running the following command in the terminal `docker network ls`, this will give you something like this (may look different on your machine):
@@ -169,7 +171,7 @@ After finding the *NETWORK ID* for the **capstone-project_default**, use it to f
 }
 ```
 
-The second application is the Apache Airflow, which controls the engineering processes in the project. This application accessible through the port 8080, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL http://172.18.0.4:8080/.
+The second application is the Apache Airflow, which controls the engineering processes in the project. This application accessible through the port 8080, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL [http://172.18.0.4:8080/](http://172.18.0.4:8080/).
 
 
 # Cleaning Up
