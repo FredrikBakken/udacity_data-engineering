@@ -34,7 +34,7 @@ default_args = {
     # 'on_retry_callback': another_function,
     # 'sla_miss_callback': yet_another_function,
     # 'trigger_rule': 'all_success'
-    'is_paused_upon_creation': False,
+    'dags_are_paused_at_creation': False,
 }
 
 dag = DAG(
@@ -136,12 +136,12 @@ def clean_the_dataset(**kwargs):
     print("Cleaning the dataset...")
 
     packet_schema = StructType([
-        StructField("ts", StringType(), True),
-        StructField("uid", StringType(), True),
-        StructField("orig_host", StringType(), True),
-        StructField("orig_port", StringType(), True),
-        StructField("resp_host", StringType(), True),
-        StructField("resp_port", StringType(), True),
+        StructField("ts", StringType(), False),
+        StructField("uid", StringType(), False),
+        StructField("orig_host", StringType(), False),
+        StructField("orig_port", IntegerType(), False),
+        StructField("resp_host", StringType(), False),
+        StructField("resp_port", IntegerType(), False),
         StructField("protocol", StringType(), True),
         StructField("service", StringType(), True),
         StructField("duration", StringType(), True),
@@ -150,12 +150,12 @@ def clean_the_dataset(**kwargs):
         StructField("conn_state", StringType(), True),
         StructField("local_orig", StringType(), True),
         StructField("local_resp", StringType(), True),
-        StructField("missed_bytes", StringType(), True),
+        StructField("missed_bytes", IntegerType(), True),
         StructField("history", StringType(), True),
-        StructField("orig_pkts", StringType(), True),
-        StructField("orig_ip_bytes", StringType(), True),
-        StructField("resp_pkts", StringType(), True),
-        StructField("resp_ip_bytes", StringType(), True),
+        StructField("orig_pkts", IntegerType(), True),
+        StructField("orig_ip_bytes", IntegerType(), True),
+        StructField("resp_pkts", IntegerType(), True),
+        StructField("resp_ip_bytes", IntegerType(), True),
         StructField("tunnel_parents", StringType(), True),
     ])
 
@@ -178,6 +178,12 @@ def clean_the_dataset(**kwargs):
 
             df.printSchema()
 
+            # Get label information from tunnel_parents
+            df = df.withColumn("label", F.split(df.tunnel_parents, "[ ]{3,}").getItem(1)) \
+                .withColumn("detailed_label", F.split(df.tunnel_parents, "[ ]{3,}").getItem(2)) \
+                .withColumn("tunnel_parents", F.split(df.tunnel_parents, "[ ]{3,}").getItem(0)) \
+            
+            # Get necessary date values from ts
             df = df.withColumn("timestamp", F.split(df.ts, "\.").getItem(0))
             df = df.withColumn("date", F.to_date(F.from_unixtime(df.timestamp)))
             df = df.withColumn("year", F.year(df.date)) \
@@ -204,7 +210,7 @@ def remove_raw_dataset(**kwargs):
     ti = kwargs['ti']
     status_code = ti.xcom_pull(key=None, task_ids='check_if_cleaned')
 
-    if (status_code != 1):
+    if (status_code == 1):
         print("The raw dataset has already been cleaned!")
         return 0
 

@@ -61,7 +61,7 @@ The **MaxMind ASN dataset** contains a CSV file with information about network (
 The **MaxMind City dataset** contains two CSV files, the first containing the IPv4-blocks and geolocations, and the second containing support information such as continent, country, city name, and time zone. They contain a descriptive header and multiple structured columns with data, which will be used to enrich the IoT-23 dataset.
 
 ## Data Cleaning
-From the data exploration phase, it is clear that the data found in the IoT-23 dataset needs to be cleaned by removing the commented lines. Since this dataset also includes network captures from IoT devices over a time periode, it is possible to use the timestamp value found in the `time` column to split the dataset by days. This makes it possible for us to simulate a summary of daily packets, which can be processed by a daily schedule using Apache Airflow.
+From the data exploration phase, it is clear that the data found in the IoT-23 dataset needs to be cleaned by removing the commented lines. Since this dataset also includes network captures from IoT devices over a time periode, it is possible to use the timestamp value found in the `ts` column to split the dataset by days. This makes it possible for us to simulate a summary of daily packets, which can be processed by a daily schedule using Apache Airflow.
 
 The data found in the MaxMind datasets does not need further cleaning.
 
