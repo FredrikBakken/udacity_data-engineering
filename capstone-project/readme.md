@@ -70,7 +70,7 @@ An [Airflow DAG](https://airflow.apache.org/docs/stable/concepts.html#dags) is t
 1. **check_if_cleaned** | Checks the status of the cleaning process by looking at what dataset directories that exist and pushes the corresponding `status_code` to xcom. If only the cleaned dataset directory exist, then the `status_code` is set to `1`, and if only the raw dataset directory exist, then the `status_code` is set to `0`.
 2. **remove_honeypot_captures** | If the `status_code != 1`, then the honeypot sub-directories in the raw dataset directory are removed.
 3. **remove_commented_lines** | If the `status_code != 1`, then the commented lines (starts with #) in each file of the raw dataset are removed.
-4. **clean_the_dataset** | If the `status_code != 1`, then Apache Spark is used to extract each file in the raw dataset one at a time (to avoid extensive disk space usage of more than 100GB) into a DataFrame. It also applies some simple manipulation of the data by organizing the label information into new columns and adding columns for year, month, and day. Therefter it writes (appends) the results by repartitioning the by day into the cleaned `iot-23`-directory. At the end of each loop, it deleted the corresponding raw dataset file.
+4. **clean_the_dataset** | If the `status_code != 1`, then [Apache Spark](https://spark.apache.org/) is used to extract each file in the raw dataset one at a time (to avoid extensive disk space usage of more than 100GB) into a DataFrame. It also applies some simple manipulation of the data by organizing the label information into new columns and adding columns for year, month, and day. Therefter it writes (appends) the results by repartitioning the by day into the cleaned `iot-23`-directory. At the end of each loop, it deleted the corresponding raw dataset file.
 5. **remove_raw_dataset** | Cleaning is finished by deleting the directory structure of the original raw dataset.
 
 The data found in the MaxMind datasets does not need further cleaning.
@@ -78,7 +78,7 @@ The data found in the MaxMind datasets does not need further cleaning.
 # Step 3 | Define the Data Model
 
 ## Data Model
-...
+![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 
 ## Data Pipeline
 ...
