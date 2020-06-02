@@ -8,7 +8,7 @@ In this project, you can choose to complete the project provided for you, or def
 # Step 1 | Scope the Project and Gather Data
 
 ## Scope of the Project
-The capstone project for my journey through the Udacity Data Engineering course looks into creating a data pipeline by using the IoT-23 dataset by Stratosphere Laboratory and enriching the dataset with IP related information from two other datasets, *ASN* ([autonomous system number](https://en.wikipedia.org/wiki/Autonomous_system_(Internet))) and *City*, by MaxMind. It is built using a Docker container environment for simple scaling and deployment to *any* platform.
+The capstone project for my journey through the [Udacity Data Engineering](https://www.udacity.com/course/data-engineer-nanodegree--nd027) course looks into creating a data pipeline by using the IoT-23 dataset by Stratosphere Laboratory and enriching the dataset with IP related information from two other datasets, *ASN* ([autonomous system number](https://en.wikipedia.org/wiki/Autonomous_system_(Internet))) and *City*, by MaxMind. It is built using a Docker container environment for simple scaling and deployment to *any* platform.
 
 ## Datasets
 This project looks into engineering data from the [IoT-23 dataset](https://www.stratosphereips.org/datasets-iot23), *a labeled dataset with malicious and benign IoT network traffic*, and two support datasets from MaxMind's [GeoIP2 databases](https://dev.maxmind.com/geoip/geoip2/geolite2/), with correlated IP-information about geographical locations and ASNs.
@@ -78,7 +78,7 @@ The data found in the MaxMind datasets does not need further cleaning.
 # Step 3 | Define the Data Model
 
 ## Data Model
-The data model that is used for this project is a snowflake schema, since *City Blocks* contains two geoname IDs for each row towards different locations. Had there only been a single geoname ID, then a star schema would have been the best approach.
+The data model that is used for this project can be represented by a [snowflake schema](https://en.wikipedia.org/wiki/Snowflake_schema), since *City Blocks* contains two geoname IDs for each row towards different locations. Had there only been a single geoname ID, then a [star schema](https://en.wikipedia.org/wiki/Star_schema) would have been the best approach.
 
 ![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 

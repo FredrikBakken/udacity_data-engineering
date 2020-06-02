@@ -33,8 +33,7 @@ default_args = {
     # 'on_success_callback': some_other_function,
     # 'on_retry_callback': another_function,
     # 'sla_miss_callback': yet_another_function,
-    # 'trigger_rule': 'all_success'
-    'dags_are_paused_at_creation': False,
+    # 'trigger_rule': 'all_success',
 }
 
 dag = DAG(
@@ -147,6 +146,8 @@ def clean_the_dataset(**kwargs):
     spark = SparkSession \
         .builder \
         .appName("Dataset Cleaner") \
+        .config("spark.executor.memory", "4g") \
+        .config("spark.driver.memory","4g") \
         .getOrCreate()
     
     for root, dirs, files in os.walk(path_raw_dataset):
