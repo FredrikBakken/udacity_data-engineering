@@ -13,7 +13,7 @@ The capstone project for my journey through the [Udacity Data Engineering](https
 ## Datasets
 This project looks into engineering data from the [IoT-23 dataset](https://www.stratosphereips.org/datasets-iot23), *a labeled dataset with malicious and benign IoT network traffic*, and two support datasets from MaxMind's [GeoIP2 databases](https://dev.maxmind.com/geoip/geoip2/geolite2/), with correlated IP-information about geographical locations and ASNs.
 
-1. The IoT-23 dataset is used as the baseline for this project, which includes PCAP-data with attached labels that describes the corresponding malware or benign information. In total the dataset contains 764,308,000 packets that has been captured between 2018 to 2019.
+1. The IoT-23 dataset is used as the baseline for this project, which includes PCAP-data with attached labels that describes the corresponding malware or benign information. In total the dataset contains 764,308,000 packets that has been captured between 9th of May 2018 to 21st of September 2019.
 
 > "IoT-23 is a new dataset of network traffic from Internet of Things (IoT) devices. It has 20 malware captures executed in IoT devices, and 3 captures for benign IoT devices traffic. It was first published in January 2020, with captures ranging from 2018 to 2019. This IoT network traffic was captured in the Stratosphere Laboratory, AIC group, FEL, CTU University, Czech Republic. Its goal is to offer a large dataset of real and labeled IoT malware infections and IoT benign traffic for researchers to develop machine learning algorithms. This dataset and its research is funded by Avast Software, Prague." - [https://www.stratosphereips.org/datasets-iot23](https://www.stratosphereips.org/datasets-iot23)
 
@@ -138,40 +138,40 @@ Copy the URL found (in this case: [http://127.0.0.1:8888/?token=aec84158afbad9a3
 ### Apache Airflow
 Docker containers are spun up to run in their own [network environments](https://docker-curriculum.com/#docker-network), which can be accessed by using the exposed ports. You can find the network ID of the current docker-compose project by running the following command in the terminal `docker network ls`, this will give you something like this (may look different on your machine):
 
-| NETWORK ID   | NAME                     | DRIVER | SCOPE |
-| ------------ | ------------------------ | ------ | ----- |
-| ab818bc6e69c | bridge                   | bridge | local |
-| 66372c0553ca | capstone-project_default | bridge | local |
+| NETWORK ID   | NAME                             | DRIVER | SCOPE |
+| ------------ | -------------------------------- | ------ | ----- |
+| ab818bc6e69c | bridge                           | bridge | local |
+| 66372c0553ca | capstone-project_udacity_network | bridge | local |
 
-After finding the *NETWORK ID* for the **capstone-project_default**, use it to find the IPv4 hosts for the three containers in the project by running `docker network inspect <network ID>` (in this example the command is `docker network inspect 66372c0553ca`). The output in the terminal is a JSON-formatted description of the Docker container network, where the interesting part can be found within the "Containers"-section:
+After finding the *NETWORK ID* for the **capstone-project_udacity_network**, use it to find the IPv4 hosts for the three containers in the project by running `docker network inspect <network ID>` (in this example the command is `docker network inspect 66372c0553ca`). The output in the terminal is a JSON-formatted description of the Docker container network, where the interesting part can be found within the "Containers"-section:
 
 ```
 "Containers": {
-    "776a40a69ac33eb81f3b2cb7c8396d0109f8cf81c08d758c50f5cf81b799bfbe": {
+    "29994cc51a391ee1015e15d578e91e3e979c687b16752b7d35d232738a8d5028": {
         "Name": "data-engineering",
-        "EndpointID": "2cdace886f0688dc08fd2c9136795cbf0dd7116c6d786a3d5148cc12b9503bb8",
-        "MacAddress": "02:42:ac:12:00:04",
-        "IPv4Address": "172.18.0.4/16",
+        "EndpointID": "3c14b33b801a46c4559068e5750ff8ee256fe2b67f980a13e69d6bc98b7720f9",
+        "MacAddress": "02:42:ac:1c:01:01",
+        "IPv4Address": "172.28.1.1/16",
         "IPv6Address": ""
     },
-    "bf864eca62afa50d9de4a067f15360cc5cd7360e50d9b59cf38393cd5b851dd8": {
+    "4b65e64ba58c80a882d5cf3083fc67910cfc645e3849e56d262d1a0bbb55f796": {
         "Name": "visual-analytics",
-        "EndpointID": "15f826bd93faf95ecfd27020f78466171c8e90e98a7100c0a5f0d52349a8203e",
-        "MacAddress": "02:42:ac:12:00:03",
-        "IPv4Address": "172.18.0.3/16",
+        "EndpointID": "9173c03c507c5b1a115a800c3dc9394bf5849fa34afe2486c40a733e77bc12f3",
+        "MacAddress": "02:42:ac:1c:01:03",
+        "IPv4Address": "172.28.1.3/16",
         "IPv6Address": ""
     },
-    "e41372b436510388dd80fc963c865671e3fe4d4d0902cd6b6d69fa4c13c3d0da": {
+    "64d2d684fb043454f345bd1241545c911b2ba6299bb6dde522a91f37fd47d9ad": {
         "Name": "data-warehouse",
-        "EndpointID": "891c84c87dcb8dd6b2670a0dfcfd808b149f5abef837d27edb05bd518841a908",
-        "MacAddress": "02:42:ac:12:00:02",
-        "IPv4Address": "172.18.0.2/16",
+        "EndpointID": "df2e060e2999d5bb4fc437bfccdf3b2a378bd9d975361cbd37bfcb4d8cb847f1",
+        "MacAddress": "02:42:ac:1c:01:02",
+        "IPv4Address": "172.28.1.2/16",
         "IPv6Address": ""
     }
 }
 ```
 
-The second application is the Apache Airflow, which controls the engineering processes in the project. This application accessible through the port 8080, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL [http://172.18.0.4:8080/](http://172.18.0.4:8080/).
+The second application is the Apache Airflow, which controls the engineering processes in the project. This application accessible through the port 8080, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL [http://172.28.1.1:8080/](http://172.28.1.1:8080/).
 
 
 # Cleaning Up

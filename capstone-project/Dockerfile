@@ -64,8 +64,4 @@ ADD ./datasets /usr/local/airflow/datasets
 #    && tar xzf iot_23_datasets_small.tar.gz \
 #    && rm iot_23_datasets_small.tar.gz
 
-# Experiments - TODO: Remove
-#RUN mkdir /usr/local/airflow/datasets/experiments
-#ADD ./experiments/ /usr/local/airflow/datasets/experiments
-
 USER root
