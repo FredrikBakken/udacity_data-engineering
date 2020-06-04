@@ -45,6 +45,9 @@ RUN pip install --upgrade pip \
     && pip install psycopg2-binary \
     && pip install gdown
 
+# Add Postgres JAR
+ADD ./config/ /usr/local/airflow/config
+
 # Add DAGs to Airflow UI
 ADD ./dags/ /usr/local/airflow/dags
 
