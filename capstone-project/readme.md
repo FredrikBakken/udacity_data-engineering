@@ -86,7 +86,6 @@ The data model that is used for this project can be represented by a [snowflake 
 ...
 
 # Step 4 | Run ETL to Model the Data
-...
 
 # Get Started
 
@@ -125,7 +124,7 @@ Once everything is successfully downloaded and the Docker containers are up and 
 Okei! If you have gotten to this stage, then the project is successfully configured and three containers are up and running, but *what now*? The next step is to actually launch the applications found in this project.
 
 ### Jupyter Notebook
-The first application to open is the Jupyter Notebook, which is used to analyze the output results and for checking the data quality. This application URL can be found in the terminal window where the `docker-compose up` command was ran, e.g.:
+The first application to open is the Jupyter Notebook (before the URL to access the application disappears too far up the terminal output), which is used to analyze the output results and for checking the data quality. This application URL can be found in the terminal window where the `docker-compose up` command was ran, e.g.:
 
 ```
 visual-analytics        | [I 10:46:28.366 NotebookApp] The Jupyter Notebook is running at:
@@ -174,7 +173,15 @@ After finding the *NETWORK ID* for the **capstone-project_udacity_network**, use
 The second application is the Apache Airflow, which controls the engineering processes in the project. This application accessible through the port 8080, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL [http://172.28.1.1:8080/](http://172.28.1.1:8080/).
 
 
-# Cleaning Up
+## Running the Applications
+
+### Data Engineering
+...
+
+### Data Analytics
+...
+
+## Cleaning Up
 Once the project has been successfully ran, one can clean up the cluttered files on the system by running the following commands in the terminal.
 
 **WARNING:** This will delete *ALL* Docker images and running containers on your system. DO NOT run these commands if there already exists Docker images/containers on your system which you want to keep.

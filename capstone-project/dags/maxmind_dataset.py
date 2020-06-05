@@ -1,7 +1,6 @@
 import os
-import pyspark
-import pyspark.sql.functions as F
 import psycopg2
+import pyspark.sql.functions as F
 
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
@@ -431,6 +430,7 @@ task_check_data_quality = PythonOperator(
 
 
 # ########################################################################
+
 
 task_check_if_datasets_exist >> task_drop_asn_table
 task_drop_asn_table >> task_create_asn_table
