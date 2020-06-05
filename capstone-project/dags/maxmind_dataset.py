@@ -59,6 +59,7 @@ def establish_connection():
 # SQL query statements
 drop_table = "DROP TABLE IF EXISTS {};"
 create_table = "CREATE TABLE IF NOT EXISTS {} ({});"
+count_select = "SELECT count(*) FROM {};"
 
 # Get or create Spark session
 def get_spark_session(appName):
@@ -93,11 +94,9 @@ def check_if_datasets_exist(**kwargs):
     city_locations_exists = os.path.exists(path_city_locations)
 
     if (not asn_blocks_exists and not city_blocks_exists and not city_locations_exists):
-        print("The MaxMind dataset files were not found!")
-        return 0
-    
+        raise ValueError('ERROR! One or more of the MaxMind dataset files were not found...')
+
     print("Checking if the MaxMind datasets exist completed!")
-    return 1
 
 
 def drop_asn_table(**kwargs):
@@ -143,9 +142,11 @@ def create_asn_table(**kwargs):
     cursor.execute(
         create_table.format("asn",
             """
+            network_id                      VARCHAR,
             network                         VARCHAR,
             autonomous_system_number        INTEGER,
-            autonomous_system_organization  VARCHAR
+            autonomous_system_organization  VARCHAR,
+            PRIMARY KEY (network_id)
             """
         )
     )
@@ -167,6 +168,7 @@ def create_city_tables(**kwargs):
     cursor.execute(
         create_table.format("city_blocks",
             """
+            network_id                      VARCHAR,
             network                         VARCHAR,
             geoname_id                      INTEGER,
             registered_country_geoname_id   INTEGER,
@@ -176,7 +178,8 @@ def create_city_tables(**kwargs):
             postal_code                     VARCHAR,
             latitude                        FLOAT,
             longitude                       FLOAT,
-            accuracy_radius                 INTEGER
+            accuracy_radius                 INTEGER,
+            PRIMARY KEY (network_id, geoname_id, registered_country_geoname_id)
             """
         )
     )
@@ -197,7 +200,8 @@ def create_city_tables(**kwargs):
             city_name                       VARCHAR,
             metro_code                      VARCHAR,
             time_zone                       VARCHAR,
-            is_in_european_union            INTEGER
+            is_in_european_union            INTEGER,
+            PRIMARY KEY (geoname_id)
             """
         )
     )
@@ -227,18 +231,19 @@ def insert_asn_into_table(**kwargs):
         .schema(asn_schema) \
         .csv(path_asn_blocks)
 
+    df = df.withColumn("network_id", F.split(df.network, ".0\/").getItem(0))
+
     df.printSchema()
     df.show(10, truncate = False)
-    print(df.count())
+    kwargs['ti'].xcom_push(key='asn_count', value=df.count())
     
     print("Writing the dataset data to the ASN table.")
-    df.write \
-        .jdbc(
-            url = url,
-            table = "asn",
-            mode = mode,
-            properties = properties
-        )
+    df.write.jdbc(
+        url = url,
+        table = "asn",
+        mode = mode,
+        properties = properties,
+    )
 
     print("Inserting data into the ASN table completed!")
 
@@ -268,18 +273,19 @@ def insert_city_blocks_into_table(**kwargs):
         .schema(city_blocks_schema) \
         .csv(path_city_blocks)
 
+    df = df.withColumn("network_id", F.split(df.network, ".0\/").getItem(0))
+
     df.printSchema()
     df.show(10, truncate = False)
-    print(df.count())
+    kwargs['ti'].xcom_push(key='city_blocks_count', value=df.count())
     
     print("Writing the dataset data to the City Blocks table.")
-    df.write \
-        .jdbc(
-            url = url,
-            table = "city_blocks",
-            mode = mode,
-            properties = properties
-        )
+    df.write.jdbc(
+        url = url,
+        table = "city_blocks",
+        mode = mode,
+        properties = properties,
+    )
 
     print("Inserting data into the City Blocks table completed!")
 
@@ -315,22 +321,46 @@ def insert_city_locations_into_table(**kwargs):
 
     df.printSchema()
     df.show(10, truncate = False)
-    print(df.count())
+    kwargs['ti'].xcom_push(key='city_locations_count', value=df.count())
     
     print("Writing the dataset data to the City Locations table.")
-    df.write \
-        .jdbc(
-            url = url,
-            table = "city_locations",
-            mode = mode,
-            properties = properties
-        )
+    df.write.jdbc(
+        url = url,
+        table = "city_locations",
+        mode = mode,
+        properties = properties,
+    )
 
     print("Inserting data into the City Locations table completed!")
 
 
 def check_data_quality(**kwargs):
-    print("TODO!")
+    print("Check the data quality...")
+
+    print("Step 1 | Getting dataframe counts")
+    ti = kwargs['ti']
+    df_asn_count = ti.xcom_pull(key=None, task_ids='insert_asn_into_table')
+    df_city_blocks_count = ti.xcom_pull(key=None, task_ids='insert_city_blocks_into_table')
+    df_city_locations_count = ti.xcom_pull(key=None, task_ids='insert_city_locations_into_table')
+
+    print("Step 2 | Opening connection to the database")
+    connection, cursor = establish_connection()
+
+    print("Step 3 | Checking number of rows from each table")
+    cursor.execute(count_select.format("asn"))
+    db_asn_count = cursor.fetchone()
+
+    cursor.execute(count_select.format("city_blocks"))
+    db_city_blocks_count = cursor.fetchone()
+
+    cursor.execute(count_select.format("city_locations"))
+    db_city_locations_count = cursor.fetchone()
+
+    print("Step 4 | Confirm data quality")
+    if (df_asn_count != db_asn_count[0] or df_city_blocks_count != db_city_blocks_count[0] or df_city_locations_count != db_city_locations_count[0]):
+        raise ValueError('ERROR! Rows in the dataframes are not the same as in the database tables...')
+
+    print("SUCCESS! Checking the data quality completed!")
 
 
 # ########################################################################
