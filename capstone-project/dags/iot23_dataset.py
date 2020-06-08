@@ -1,4 +1,10 @@
+import pyspark
+import pyspark.sql.functions as F
+
 from datetime import datetime
+
+from pyspark.sql import SparkSession
+from pyspark.sql.types import *
 
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -21,14 +27,35 @@ dag = DAG(
 # ########################################################################
 
 
-def hello_world(**kwargs):
-    print("Hello world!")
-    print("Hello Norway!")
+path_cleaned_dataset = "/usr/local/airflow/datasets/iot-23"
 
+
+# ########################################################################
+
+
+# Confirm that dataset has been cleaned...
+
+
+def hello_world(**kwargs):
+    ts = kwargs["execution_date"]
+    print(ts)
+
+    print("Getting or creating a Spark Session")
+    spark = SparkSession \
+        .builder \
+        .appName("IoT-23 Dataset Inserter") \
+        .config("spark.executor.memory", "4g") \
+        .config("spark.driver.memory","4g") \
+        .getOrCreate()
+
+    df = spark \
+        .read \
+        .parquet("file:///usr/local/airflow/datasets/iot-23/year=2018/month=5/day=9")
+
+    df.show(10)
 
 def how_are_you(**kwargs):
-    print("How are you?")
-    print("I am doing well!")
+    print("Placeholder...")
 
 
 # ########################################################################

@@ -63,9 +63,20 @@ def remove_honeypot_captures(**kwargs):
     path_honeypot_capture_5_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-5-1")
     path_honeypot_capture_7_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-7-1")
 
-    rmtree(path_honeypot_capture_4_1)
-    rmtree(path_honeypot_capture_5_1)
-    rmtree(path_honeypot_capture_7_1)
+    try:
+        rmtree(path_honeypot_capture_4_1)
+    except:
+        print(path_honeypot_capture_4_1 + " already deleted.")
+
+    try:
+        rmtree(path_honeypot_capture_5_1)
+    except:
+        print(path_honeypot_capture_5_1 + " already deleted.")
+
+    try:
+        rmtree(path_honeypot_capture_7_1)
+    except: 
+        print(path_honeypot_capture_7_1 + " already deleted.")
 
     print("Removing the honeypot captures from the raw dataset completed!")
 
