@@ -9,6 +9,11 @@ from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
 
+from helpers.data_paths import *
+from helpers.db_config import *
+from helpers.spark_config import *
+from helpers.sqls import *
+
 
 default_args = {
     'owner': 'Fredrik Bakken',
@@ -21,65 +26,6 @@ dag = DAG(
     description='DAG for putting the MaxMind datasets into Postgres tables.',
     schedule_interval=None,
 )
-
-
-# ########################################################################
-
-
-# Relative paths to dataset directories
-path_asn_dataset = "/usr/local/airflow/datasets/GeoLite2-ASN-CSV_20200519"
-path_city_dataset = "/usr/local/airflow/datasets/GeoLite2-City-CSV_20200519"
-
-# Paths to the dataset files
-path_asn_blocks = os.path.join(path_asn_dataset, "GeoLite2-ASN-Blocks-IPv4.csv")
-path_city_blocks = os.path.join(path_city_dataset, "GeoLite2-City-Blocks-IPv4.csv")
-path_city_locations = os.path.join(path_city_dataset, "GeoLite2-City-Locations-en.csv")
-
-# Postgres connection variables
-database = "capstone_project"
-user = "udacity"
-password = "udacity"
-host = "172.28.1.2"
-port = "5432"
-
-# Postgres connection and cursor
-def establish_connection():
-    connection = psycopg2.connect(
-        database = database,
-        user = user,
-        password = password,
-        host = host,
-        port = port,
-    )
-    cursor = connection.cursor()
-
-    return connection, cursor
-
-# SQL query statements
-drop_table = "DROP TABLE IF EXISTS {};"
-create_table = "CREATE TABLE IF NOT EXISTS {} ({});"
-count_select = "SELECT count(*) FROM {};"
-
-# Get or create Spark session
-def get_spark_session(appName):
-    spark = SparkSession \
-        .builder \
-        .appName(appName) \
-        .config("spark.executor.memory", "4g") \
-        .config("spark.driver.memory","4g") \
-        .config("spark.jars", "/usr/local/airflow/config/postgresql-42.2.13.jar") \
-        .getOrCreate()
-    
-    return spark
-
-# Spark-Postgres connection parameters
-mode = "overwrite"
-url = "jdbc:postgresql://{}:{}/{}".format(host, port, database)
-properties = {
-    "user": user,
-    "password": password,
-    "driver": "org.postgresql.Driver"
-}
 
 
 # ########################################################################

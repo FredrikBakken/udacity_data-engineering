@@ -11,6 +11,9 @@ from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
 
+from helpers.data_paths import *
+from helpers.spark_config import *
+
 
 default_args = {
     'owner': 'Fredrik Bakken',
@@ -26,11 +29,6 @@ dag = DAG(
 
 
 # ########################################################################
-
-
-# Fixed variables shared over multiple tasks
-path_raw_dataset = "/usr/local/airflow/datasets/opt"
-path_cleaned_dataset = "/usr/local/airflow/datasets/iot-23"
 
 
 def check_if_cleaned(**kwargs):
@@ -135,12 +133,7 @@ def clean_the_dataset(**kwargs):
     ])
 
     print("Getting or creating a Spark Session")
-    spark = SparkSession \
-        .builder \
-        .appName("Dataset Cleaner") \
-        .config("spark.executor.memory", "4g") \
-        .config("spark.driver.memory","4g") \
-        .getOrCreate()
+    spark = get_spark_session("Dataset Cleaner")
     
     for root, dirs, files in os.walk(path_raw_dataset):
         for filename in files:

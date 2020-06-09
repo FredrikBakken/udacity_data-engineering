@@ -27,6 +27,7 @@ dag = DAG(
 # ########################################################################
 
 
+# Path to the dataset files
 path_cleaned_dataset = "/usr/local/airflow/datasets/iot-23"
 
 
@@ -60,6 +61,35 @@ def how_are_you(**kwargs):
 
 # ########################################################################
 
+'''
+task_check_if_dataset_exist = PythonOperator(
+    dag=dag,
+    task_id='check_if_dataset_exist',
+    python_callable=check_if_dataset_exist,
+    provide_context=True,
+)
+
+task_drop_packets_table = PythonOperator(
+    dag=dag,
+    task_id='drop_packets_table',
+    python_callable=drop_packets_table,
+    provide_context=True,
+)
+
+task_drop_originate_packets_table = PythonOperator(
+    dag=dag,
+    task_id='drop_originate_packets_table',
+    python_callable=drop_originate_packets_table,
+    provide_context=True,
+)
+
+task_drop_response_packets_table = PythonOperator(
+    dag=dag,
+    task_id='drop_response_packets_table',
+    python_callable=drop_response_packets_table,
+    provide_context=True,
+)
+'''
 
 task_hello_world = PythonOperator(
     dag=dag,
@@ -77,6 +107,10 @@ task_how_are_you = PythonOperator(
 
 
 # ########################################################################
-
+'''
+task_check_if_dataset_exist >> task_drop_packets_table
+task_check_if_dataset_exist >> task_drop_originate_packets_table
+task_check_if_dataset_exist >> task_drop_response_packets_table
+'''
 
 task_hello_world >> task_how_are_you
