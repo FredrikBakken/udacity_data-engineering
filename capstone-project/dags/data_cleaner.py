@@ -11,18 +11,14 @@ from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
 
+from helpers.dag_config import get_arguments
 from helpers.data_paths import *
 from helpers.spark_config import *
 
 
-default_args = {
-    'owner': 'Fredrik Bakken',
-    'start_date': days_ago(0),
-}
-
 dag = DAG(
     dag_id='step-1_data-cleaner',
-    default_args=default_args,
+    default_args=get_arguments(days_ago(0)),
     description='A simple DAG for cleaning and preparing the IoT-23 dataset.',
     schedule_interval=None,
 )
