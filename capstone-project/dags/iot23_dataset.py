@@ -56,7 +56,8 @@ def create_packets_table(**kwargs):
             label VARCHAR,
             detailed_label VARCHAR,
             insert_date DATE,
-            PRIMARY KEY (uid, originate_network_id, response_network_id, insert_date)
+            PRIMARY KEY (uid, originate_network_id, insert_date),
+            FOREIGN KEY (originate_network_id) REFERENCES city_blocks (network_id)
         ) PARTITION BY RANGE (insert_date);
         """
     )

@@ -56,21 +56,36 @@ def drop_asn_table(**kwargs):
     print("Table has been successfully dropped!")
 
 
-def drop_city_tables(**kwargs):
-    print("Dropping the current MaxMind City tables...")
+def drop_city_blocks_table(**kwargs):
+    print("Dropping the current MaxMind City Blocks table...")
 
     print("Step 1 | Opening connection to the database")
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing drop table queries")
     cursor.execute(drop_table.format("city_blocks"))
+
+    print("Step 3 | Closing connection")
+    connection.close()
+    cursor.close()
+
+    print("Table has been successfully dropped!")
+
+
+def drop_city_locations_table(**kwargs):
+    print("Dropping the current MaxMind City Locations table...")
+
+    print("Step 1 | Opening connection to the database")
+    connection, cursor = establish_connection()
+
+    print("Step 2 | Executing drop table queries")
     cursor.execute(drop_table.format("city_locations"))
 
     print("Step 3 | Closing connection")
     connection.close()
     cursor.close()
 
-    print("Tables has been successfully dropped!")
+    print("Table has been successfully dropped!")
 
 
 def create_asn_table(**kwargs):
@@ -83,7 +98,7 @@ def create_asn_table(**kwargs):
     cursor.execute(
         create_table.format("asn",
             """
-            network_id                      VARCHAR,
+            network_id                      VARCHAR NOT NULL UNIQUE,
             network                         VARCHAR,
             autonomous_system_number        INTEGER,
             autonomous_system_organization  VARCHAR,
@@ -91,6 +106,7 @@ def create_asn_table(**kwargs):
             """
         )
     )
+    connection.commit()
 
     print("Step 3 | Closing connection")
     connection.close()
@@ -99,36 +115,17 @@ def create_asn_table(**kwargs):
     print("Table has been successfully created!")
 
 
-def create_city_tables(**kwargs):
-    print("Creating the current MaxMind City tables...")
+def create_city_locations_table(**kwargs):
+    print("Creating the current MaxMind City Locations table...")
 
     print("Step 1 | Opening connection to the database")
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
     cursor.execute(
-        create_table.format("city_blocks",
-            """
-            network_id                      VARCHAR,
-            network                         VARCHAR,
-            geoname_id                      INTEGER,
-            registered_country_geoname_id   INTEGER,
-            represented_country_geoname_id  INTEGER,
-            is_anonymous_proxy              INTEGER,
-            is_satellite_provider           INTEGER,
-            postal_code                     VARCHAR,
-            latitude                        FLOAT,
-            longitude                       FLOAT,
-            accuracy_radius                 INTEGER,
-            PRIMARY KEY (network_id, geoname_id, registered_country_geoname_id)
-            """
-        )
-    )
-
-    cursor.execute(
         create_table.format("city_locations",
             """
-            geoname_id                      INTEGER,
+            geoname_id                      INTEGER NOT NULL UNIQUE,
             locale_code                     VARCHAR,
             continent_code                  VARCHAR,
             continent_name                  VARCHAR,
@@ -146,6 +143,44 @@ def create_city_tables(**kwargs):
             """
         )
     )
+    connection.commit()
+
+    print("Step 3 | Closing connection")
+    connection.close()
+    cursor.close()
+
+    print("Table has been successfully created!")
+
+
+def create_city_blocks_table(**kwargs):
+    print("Creating the current MaxMind City Blocks table...")
+
+    print("Step 1 | Opening connection to the database")
+    connection, cursor = establish_connection()
+
+    print("Step 2 | Executing create table query")
+    cursor.execute(
+        create_table.format("city_blocks",
+            """
+            network_id                      VARCHAR NOT NULL UNIQUE,
+            network                         VARCHAR,
+            geoname_id                      INTEGER,
+            registered_country_geoname_id   INTEGER,
+            represented_country_geoname_id  INTEGER,
+            is_anonymous_proxy              INTEGER,
+            is_satellite_provider           INTEGER,
+            postal_code                     VARCHAR,
+            latitude                        FLOAT,
+            longitude                       FLOAT,
+            accuracy_radius                 INTEGER,
+            PRIMARY KEY (network_id, geoname_id, registered_country_geoname_id, represented_country_geoname_id),
+            FOREIGN KEY (geoname_id) REFERENCES city_locations (geoname_id),
+            FOREIGN KEY (registered_country_geoname_id) REFERENCES city_locations (geoname_id),
+            FOREIGN KEY (represented_country_geoname_id) REFERENCES city_locations (geoname_id)
+            """
+        )
+    )
+    connection.commit()
 
     print("Step 3 | Closing connection")
     connection.close()
@@ -321,10 +356,17 @@ task_drop_asn_table = PythonOperator(
     provide_context=True,
 )
 
-task_drop_city_tables = PythonOperator(
+task_drop_city_blocks_table = PythonOperator(
     dag=dag,
-    task_id='drop_city_tables',
-    python_callable=drop_city_tables,
+    task_id='drop_city_blocks_table',
+    python_callable=drop_city_blocks_table,
+    provide_context=True,
+)
+
+task_drop_city_locations_table = PythonOperator(
+    dag=dag,
+    task_id='drop_city_locations_table',
+    python_callable=drop_city_locations_table,
     provide_context=True,
 )
 
@@ -335,10 +377,17 @@ task_create_asn_table = PythonOperator(
     provide_context=True,
 )
 
-task_create_city_tables = PythonOperator(
+task_create_city_locations_table = PythonOperator(
     dag=dag,
-    task_id='create_city_tables',
-    python_callable=create_city_tables,
+    task_id='create_city_locations_table',
+    python_callable=create_city_locations_table,
+    provide_context=True,
+)
+
+task_create_city_blocks_table = PythonOperator(
+    dag=dag,
+    task_id='create_city_blocks_table',
+    python_callable=create_city_blocks_table,
     provide_context=True,
 )
 
@@ -379,9 +428,11 @@ task_drop_asn_table >> task_create_asn_table
 task_create_asn_table >> task_insert_asn_into_table
 task_insert_asn_into_table >> task_check_data_quality
 
-task_check_if_datasets_exist >> task_drop_city_tables
-task_drop_city_tables >> task_create_city_tables
-task_create_city_tables >> task_insert_city_blocks_into_table
-task_create_city_tables >> task_insert_city_locations_into_table
+task_check_if_datasets_exist >> task_drop_city_blocks_table
+task_drop_city_blocks_table >> task_drop_city_locations_table
+task_drop_city_locations_table >> task_create_city_locations_table
+task_create_city_locations_table >> task_create_city_blocks_table
+task_create_city_blocks_table >> task_insert_city_blocks_into_table
+task_create_city_blocks_table >> task_insert_city_locations_into_table
 task_insert_city_blocks_into_table >> task_check_data_quality
 task_insert_city_locations_into_table >> task_check_data_quality
