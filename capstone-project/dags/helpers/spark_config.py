@@ -1,6 +1,8 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 
+from helpers.db_config import url, properties
+
 
 # Get or create Spark session
 def get_spark_session(appName):
@@ -13,6 +15,16 @@ def get_spark_session(appName):
         .getOrCreate()
     
     return spark
+
+
+# Write results to Postgres database
+def write_to_db(df, mode, table):
+    df.write.jdbc(
+        url = url,
+        table = table,
+        mode = mode,
+        properties = properties,
+    )
 
 
 # Define schema for the IoT-23 dataset

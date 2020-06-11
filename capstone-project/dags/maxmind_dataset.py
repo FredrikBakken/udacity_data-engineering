@@ -34,7 +34,7 @@ def check_if_datasets_exist(**kwargs):
     city_locations_exists = os.path.exists(path_city_locations)
 
     if (not asn_blocks_exists and not city_blocks_exists and not city_locations_exists):
-        raise ValueError('ERROR! One or more of the MaxMind dataset files were not found...')
+        raise ValueError("ERROR! One or more of the MaxMind dataset files were not found...")
 
     print("Checking if the MaxMind datasets exist completed!")
 
@@ -210,12 +210,7 @@ def insert_asn_into_table(**kwargs):
     kwargs['ti'].xcom_push(key='asn_count', value=df.count())
     
     print("Writing the dataset data to the ASN table.")
-    df.write.jdbc(
-        url = url,
-        table = "asn",
-        mode = mode,
-        properties = properties,
-    )
+    write_to_db(df, "overwrite", "asn")
 
     print("Inserting data into the ASN table completed!")
 
@@ -239,12 +234,7 @@ def insert_city_blocks_into_table(**kwargs):
     kwargs['ti'].xcom_push(key='city_blocks_count', value=df.count())
     
     print("Writing the dataset data to the City Blocks table.")
-    df.write.jdbc(
-        url = url,
-        table = "city_blocks",
-        mode = mode,
-        properties = properties,
-    )
+    write_to_db(df, "overwrite", "city_blocks")
 
     print("Inserting data into the City Blocks table completed!")
 
@@ -266,12 +256,7 @@ def insert_city_locations_into_table(**kwargs):
     kwargs['ti'].xcom_push(key='city_locations_count', value=df.count())
     
     print("Writing the dataset data to the City Locations table.")
-    df.write.jdbc(
-        url = url,
-        table = "city_locations",
-        mode = mode,
-        properties = properties,
-    )
+    write_to_db(df, "overwrite", "city_locations")
 
     print("Inserting data into the City Locations table completed!")
 

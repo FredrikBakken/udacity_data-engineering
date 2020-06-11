@@ -9,7 +9,6 @@ port = "5432"
 
 
 # Spark-Postgres connection parameters
-mode = "overwrite"
 url = "jdbc:postgresql://{}:{}/{}".format(host, port, database)
 properties = {
     "user": user,
