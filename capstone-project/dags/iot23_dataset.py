@@ -11,8 +11,10 @@ from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
 
 from helpers.dag_config import get_arguments
+from helpers.data_paths import *
 from helpers.db_config import *
 from helpers.spark_config import *
+from helpers.sqls import *
 
 
 dag = DAG(
@@ -30,6 +32,64 @@ def check_if_dataset_exist(**kwargs):
     print("Checking...")
 
 
+def create_originate_packets_table(**kwargs):
+    print("Creating the IoT-23 Originate Packets table...")
+
+    print("Step 1 | Opening connection to the database")
+    connection, cursor = establish_connection()
+
+    print("Step 2 | Executing create table query")
+    cursor.execute(
+        create_table.format("originate_packets",
+            """
+            uid         VARCHAR NOT NULL UNIQUE,
+            host        VARCHAR,
+            port        VARCHAR,
+            bytes       VARCHAR,
+            packets     VARCHAR,
+            ip_bytes    VARCHAR,
+            PRIMARY KEY (uid)
+            """
+        )
+    )
+    connection.commit()
+
+    print("Step 3 | Closing connection")
+    connection.close()
+    cursor.close()
+
+    print("Table has been successfully created!")
+
+
+def create_response_packets_table(**kwargs):
+    print("Creating the IoT-23 Response Packets table...")
+
+    print("Step 1 | Opening connection to the database")
+    connection, cursor = establish_connection()
+
+    print("Step 2 | Executing create table query")
+    cursor.execute(
+        create_table.format("response_packets",
+            """
+            uid         VARCHAR NOT NULL UNIQUE,
+            host        VARCHAR,
+            port        VARCHAR,
+            bytes       VARCHAR,
+            packets     VARCHAR,
+            ip_bytes    VARCHAR,
+            PRIMARY KEY (uid)
+            """
+        )
+    )
+    connection.commit()
+
+    print("Step 3 | Closing connection")
+    connection.close()
+    cursor.close()
+
+    print("Table has been successfully created!")
+
+
 def create_packets_table(**kwargs):
     print("Creating the IoT-23 Packets table...")
 
@@ -41,7 +101,7 @@ def create_packets_table(**kwargs):
         """
         CREATE TABLE IF NOT EXISTS packets (
             timestamp VARCHAR,
-            uid VARCHAR,
+            uid VARCHAR NOT NULL UNIQUE,
             originate_network_id VARCHAR,
             response_network_id VARCHAR,
             protocol VARCHAR,
@@ -55,12 +115,12 @@ def create_packets_table(**kwargs):
             tunnel_parents VARCHAR,
             label VARCHAR,
             detailed_label VARCHAR,
-            insert_date DATE,
-            PRIMARY KEY (uid, originate_network_id, insert_date),
-            FOREIGN KEY (originate_network_id) REFERENCES city_blocks (network_id)
-        ) PARTITION BY RANGE (insert_date);
+            insert_date DATE NOT NULL,
+            PRIMARY KEY (uid)
+        );
         """
     )
+    connection.commit()
 
     print("Step 3 | Closing connection")
     connection.close()
@@ -69,29 +129,11 @@ def create_packets_table(**kwargs):
     print("Table has been successfully created!")
 
 
-def create_originate_packets_table(**kwargs):
-    print("Creating...")
-
-
-def create_response_packets_table(**kwargs):
-    print("Creating...")
-
-
 def insert_packets_into_table(**kwargs):
-    print("Read, structure, and insert")
-
-
-def insert_originate_packets_into_table(**kwargs):
-    print("Read, structure, and insert")
-
-
-def insert_response_packets_into_table(**kwargs):
-    print("Read, structure, and insert")
-
-
-def hello_world(**kwargs):
     ts = kwargs["execution_date"]
     print(ts)
+
+    print("Read, structure, and insert")
 
     '''
     print("Getting or creating a Spark Session")
@@ -105,9 +147,12 @@ def hello_world(**kwargs):
     '''
 
 
-def how_are_you(**kwargs):
-    print("Placeholder...")
+def insert_originate_packets_into_table(**kwargs):
+    print("Read, structure, and insert")
 
+
+def insert_response_packets_into_table(**kwargs):
+    print("Read, structure, and insert")
 
 
 # ########################################################################
@@ -117,13 +162,6 @@ task_check_if_dataset_exist = PythonOperator(
     dag=dag,
     task_id='check_if_dataset_exist',
     python_callable=check_if_dataset_exist,
-    provide_context=True,
-)
-
-task_create_packets_table = PythonOperator(
-    dag=dag,
-    task_id='create_packets_table',
-    python_callable=create_packets_table,
     provide_context=True,
 )
 
@@ -138,6 +176,13 @@ task_create_response_packets_table = PythonOperator(
     dag=dag,
     task_id='create_response_packets_table',
     python_callable=create_response_packets_table,
+    provide_context=True,
+)
+
+task_create_packets_table = PythonOperator(
+    dag=dag,
+    task_id='create_packets_table',
+    python_callable=create_packets_table,
     provide_context=True,
 )
 
@@ -162,29 +207,14 @@ task_insert_response_packets_into_table = PythonOperator(
     provide_context=True,
 )
 
-task_hello_world = PythonOperator(
-    dag=dag,
-    task_id='hello_world',
-    python_callable=hello_world,
-    provide_context=True,
-)
-
-task_how_are_you = PythonOperator(
-    dag=dag,
-    task_id='how_are_you',
-    python_callable=how_are_you,
-    provide_context=True,
-)
-
 
 # ########################################################################
 
 
-task_check_if_dataset_exist >> task_create_packets_table
 task_check_if_dataset_exist >> task_create_originate_packets_table
 task_check_if_dataset_exist >> task_create_response_packets_table
-task_create_packets_table >> task_insert_packets_into_table
+task_create_originate_packets_table >> task_create_packets_table
 task_create_originate_packets_table >> task_insert_originate_packets_into_table
+task_create_response_packets_table >> task_create_packets_table
 task_create_response_packets_table >> task_insert_response_packets_into_table
-
-task_hello_world >> task_how_are_you
+task_create_packets_table >> task_insert_packets_into_table

@@ -3,7 +3,6 @@ import psycopg2
 import pyspark.sql.functions as F
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import *
 
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -173,10 +172,7 @@ def create_city_blocks_table(**kwargs):
             latitude                        FLOAT,
             longitude                       FLOAT,
             accuracy_radius                 INTEGER,
-            PRIMARY KEY (network_id, geoname_id, registered_country_geoname_id, represented_country_geoname_id),
-            FOREIGN KEY (geoname_id) REFERENCES city_locations (geoname_id),
-            FOREIGN KEY (registered_country_geoname_id) REFERENCES city_locations (geoname_id),
-            FOREIGN KEY (represented_country_geoname_id) REFERENCES city_locations (geoname_id)
+            PRIMARY KEY (network_id)
             """
         )
     )
@@ -227,19 +223,6 @@ def insert_asn_into_table(**kwargs):
 def insert_city_blocks_into_table(**kwargs):
     print("Inserting data into the City Blocks table...")
 
-    city_blocks_schema = StructType([
-        StructField("network", StringType(), False),
-        StructField("geoname_id", IntegerType(), False),
-        StructField("registered_country_geoname_id", IntegerType(), False),
-        StructField("represented_country_geoname_id", IntegerType(), False),
-        StructField("is_anonymous_proxy", IntegerType(), False),
-        StructField("is_satellite_provider", IntegerType(), False),
-        StructField("postal_code", StringType(), False),
-        StructField("latitude", FloatType(), False),
-        StructField("longitude", FloatType(), False),
-        StructField("accuracy_radius", IntegerType(), False),
-    ])
-
     spark = get_spark_session("MaxMind City Blocks Dataset Inserter")
 
     df = spark \
@@ -268,23 +251,6 @@ def insert_city_blocks_into_table(**kwargs):
 
 def insert_city_locations_into_table(**kwargs):
     print("Inserting data into the City Locations table...")
-
-    city_locations_schema = StructType([
-        StructField("geoname_id", IntegerType(), False),
-        StructField("locale_code", StringType(), False),
-        StructField("continent_code", StringType(), False),
-        StructField("continent_name", StringType(), False),
-        StructField("country_iso_code", StringType(), False),
-        StructField("country_name", StringType(), False),
-        StructField("subdivision_1_iso_code", StringType(), False),
-        StructField("subdivision_1_name", StringType(), False),
-        StructField("subdivision_2_iso_code", StringType(), False),
-        StructField("subdivision_2_name", StringType(), False),
-        StructField("city_name", StringType(), False),
-        StructField("metro_code", StringType(), False),
-        StructField("time_zone", StringType(), False),
-        StructField("is_in_european_union", IntegerType(), False),
-    ])
 
     spark = get_spark_session("MaxMind City Locations Dataset Inserter")
 

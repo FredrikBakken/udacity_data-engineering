@@ -5,7 +5,6 @@ import pyspark.sql.functions as F
 from shutil import rmtree
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import *
 
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -103,30 +102,6 @@ def clean_the_dataset(**kwargs):
         return 0
 
     print("Cleaning the dataset...")
-
-    packet_schema = StructType([
-        StructField("ts", StringType(), False),
-        StructField("uid", StringType(), False),
-        StructField("originate_host", StringType(), False),
-        StructField("originate_port", IntegerType(), False),
-        StructField("response_host", StringType(), False),
-        StructField("response_port", IntegerType(), False),
-        StructField("protocol", StringType(), True),
-        StructField("service", StringType(), True),
-        StructField("duration", StringType(), True),
-        StructField("originate_bytes", StringType(), True),
-        StructField("response_bytes", StringType(), True),
-        StructField("connection_state", StringType(), True),
-        StructField("local_originate", StringType(), True),
-        StructField("local_response", StringType(), True),
-        StructField("missed_bytes", IntegerType(), True),
-        StructField("history", StringType(), True),
-        StructField("originate_packets", IntegerType(), True),
-        StructField("originate_ip_bytes", IntegerType(), True),
-        StructField("response_packets", IntegerType(), True),
-        StructField("response_ip_bytes", IntegerType(), True),
-        StructField("tunnel_parents", StringType(), True),
-    ])
 
     print("Getting or creating a Spark Session")
     spark = get_spark_session("Dataset Cleaner")
