@@ -51,11 +51,6 @@ def remove_honeypot_captures(**kwargs):
         return 0
 
     print("Removing the honeypot captures from the raw dataset...")
-    path_captures = os.path.join(path_raw_dataset, "Malware-Project/BigDataset/IoTScenarios")
-    path_honeypot_capture_4_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-4-1")
-    path_honeypot_capture_5_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-5-1")
-    path_honeypot_capture_7_1 = os.path.join(path_captures, "CTU-Honeypot-Capture-7-1")
-
     try:
         rmtree(path_honeypot_capture_4_1)
     except:

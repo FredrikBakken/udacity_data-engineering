@@ -1,8 +1,14 @@
 from os.path import join
 
-# Fixed variables shared over multiple tasks
+# Raw and cleaned IoT-23 dataset paths
 path_raw_dataset = "/usr/local/airflow/datasets/opt"
 path_cleaned_dataset = "/usr/local/airflow/datasets/iot-23"
+
+# Honeypot capture paths
+path_captures = join(path_raw_dataset, "Malware-Project/BigDataset/IoTScenarios")
+path_honeypot_capture_4_1 = join(path_captures, "CTU-Honeypot-Capture-4-1")
+path_honeypot_capture_5_1 = join(path_captures, "CTU-Honeypot-Capture-5-1")
+path_honeypot_capture_7_1 = join(path_captures, "CTU-Honeypot-Capture-7-1")
 
 # Relative paths to dataset directories
 path_asn_dataset = "/usr/local/airflow/datasets/GeoLite2-ASN-CSV_20200519"
