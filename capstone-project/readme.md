@@ -89,7 +89,7 @@ The data model that is used for this project can be represented by a [snowflake 
 ![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 
 ## Data Pipelines
-Three data pipelines are defined for this project and each of them has its own Apache Airflow workflow.
+Three data pipelines are defined for this project and each of them has its own Apache Airflow DAG.
 
 ### Data Cleaner
 ![Pipeline: Data Cleaner](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_data-cleaner.png)
@@ -210,16 +210,16 @@ docker rmi -f $(docker images -a -q)
 # Step 5 | Complete Project Write Up
 
 ## Questions & Answers
-1. **What's the goal?**<br/><br/>...<br/><br/><br/>
-2. **What queries will you want to run?**<br/><br/>...<br/><br/><br/>
-3. **How would Spark or Airflow be incorporated?**<br/><br/>...<br/><br/><br/>
-4. **Why did you choose the model you chose?**<br/><br/>...<br/><br/><br/>
-5. **State the rationale for the choice of tools and technologies for the project.**<br/><br/>...<br/><br/><br/>
-6. **How often the data should be updated and why?**<br/><br/>...<br/><br/><br/>
+1. **What's the goal?**<br/>...<br/><br/>
+2. **What queries will you want to run?**<br/>...<br/><br/>
+3. **How would Spark or Airflow be incorporated?**<br/>...<br/><br/>
+4. **Why did you choose the model you chose?**<br/>...<br/><br/>
+5. **State the rationale for the choice of tools and technologies for the project.**<br/>...<br/><br/>
+6. **How often the data should be updated and why?**<br/>...
 
 ## Scenarios
 How would you approach the problem differently under the following scenarios?
 
-1. **If the data was increased by 100x.**<br/><br/>...<br/><br/><br/>
-2. **If the pipelines were run on a daily basis by 7am.**<br/><br/>...<br/><br/><br/>
-3. **If the database needed to be accessed by 100+ people.**<br/><br/>...<br/><br/><br/>
+1. **If the data was increased by 100x.**<br/>In case where the total amount of data is increased by 100x, it would be necessary to increase the total amount of disk space and increase the number of workers. This can be done by running the project/application in a cluster environment (e.g. AWS, Azure, Google Cloud, or a self-configured Hadoop cluster) with multiple worker nodes and more disks for storage.<br/><br/>
+2. **If the pipelines were run on a daily basis by 7am.**<br/>The current IoT-23 pipeline is configured to run on a daily scheduled interval at 23:59. This pipeline just has to be updated to run at 07:00 instead.<br/><br/>
+3. **If the database needed to be accessed by 100+ people.**<br/>In the case where the database has to be accessed by 100+ people, it would require that the **Data Warehouse** container is depolyed in a shared environment which can be accessed by multiple people. This can be done by e.g. having a shared Redshift data warehouse.
