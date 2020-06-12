@@ -94,17 +94,7 @@ def create_asn_table(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
-    cursor.execute(
-        create_table.format("asn",
-            """
-            network_id                      VARCHAR NOT NULL UNIQUE,
-            network                         VARCHAR,
-            autonomous_system_number        INTEGER,
-            autonomous_system_organization  VARCHAR,
-            PRIMARY KEY (network_id)
-            """
-        )
-    )
+    cursor.execute(create_table_asn)
     connection.commit()
 
     print("Step 3 | Closing connection")
@@ -121,27 +111,7 @@ def create_city_locations_table(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
-    cursor.execute(
-        create_table.format("city_locations",
-            """
-            geoname_id                      INTEGER NOT NULL UNIQUE,
-            locale_code                     VARCHAR,
-            continent_code                  VARCHAR,
-            continent_name                  VARCHAR,
-            country_iso_code                VARCHAR,
-            country_name                    VARCHAR,
-            subdivision_1_iso_code          VARCHAR,
-            subdivision_1_name              VARCHAR,
-            subdivision_2_iso_code          VARCHAR,
-            subdivision_2_name              VARCHAR,
-            city_name                       VARCHAR,
-            metro_code                      VARCHAR,
-            time_zone                       VARCHAR,
-            is_in_european_union            INTEGER,
-            PRIMARY KEY (geoname_id)
-            """
-        )
-    )
+    cursor.execute(create_table_city_locations)
     connection.commit()
 
     print("Step 3 | Closing connection")
@@ -158,24 +128,7 @@ def create_city_blocks_table(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
-    cursor.execute(
-        create_table.format("city_blocks",
-            """
-            network_id                      VARCHAR NOT NULL UNIQUE,
-            network                         VARCHAR,
-            geoname_id                      INTEGER,
-            registered_country_geoname_id   INTEGER,
-            represented_country_geoname_id  INTEGER,
-            is_anonymous_proxy              INTEGER,
-            is_satellite_provider           INTEGER,
-            postal_code                     VARCHAR,
-            latitude                        FLOAT,
-            longitude                       FLOAT,
-            accuracy_radius                 INTEGER,
-            PRIMARY KEY (network_id)
-            """
-        )
-    )
+    cursor.execute(create_table_city_blocks)
     connection.commit()
 
     print("Step 3 | Closing connection")
@@ -188,14 +141,10 @@ def create_city_blocks_table(**kwargs):
 def insert_asn_into_table(**kwargs):
     print("Inserting data into the ASN table...")
 
-    asn_schema = StructType([
-        StructField("network", StringType(), False),
-        StructField("autonomous_system_number", IntegerType(), False),
-        StructField("autonomous_system_organization", StringType(), False),
-    ])
-
+    print("Step 1 | Get or create a Spark Session")
     spark = get_spark_session("MaxMind ASN Dataset Inserter")
 
+    print("Step 2 | Extract the MaxMind ASN dataset")
     df = spark \
         .read \
         .option("delimiter", ",") \
@@ -203,13 +152,16 @@ def insert_asn_into_table(**kwargs):
         .schema(asn_schema) \
         .csv(path_asn_blocks)
 
+    print("Step 3 | Add the missing column")
     df = df.withColumn("network_id", F.split(df.network, ".0\/").getItem(0))
 
     df.printSchema()
     df.show(10, truncate = False)
+
+    print("Step 4 | Log the count of the DataFrame for data quality checks")
     kwargs['ti'].xcom_push(key='asn_count', value=df.count())
     
-    print("Writing the dataset data to the ASN table.")
+    print("Step 5 | Load the dataset data to the ASN table.")
     write_to_db(df, "overwrite", "asn")
 
     print("Inserting data into the ASN table completed!")
@@ -218,8 +170,10 @@ def insert_asn_into_table(**kwargs):
 def insert_city_blocks_into_table(**kwargs):
     print("Inserting data into the City Blocks table...")
 
+    print("Step 1 | Get or create a Spark Session")
     spark = get_spark_session("MaxMind City Blocks Dataset Inserter")
 
+    print("Step 2 | Extract the MaxMind City Blocks dataset")
     df = spark \
         .read \
         .option("delimiter", ",") \
@@ -227,13 +181,16 @@ def insert_city_blocks_into_table(**kwargs):
         .schema(city_blocks_schema) \
         .csv(path_city_blocks)
 
+    print("Step 3 | Add the missing column")
     df = df.withColumn("network_id", F.split(df.network, ".0\/").getItem(0))
 
     df.printSchema()
     df.show(10, truncate = False)
+
+    print("Step 4 | Log the count of the DataFrame for data quality checks")
     kwargs['ti'].xcom_push(key='city_blocks_count', value=df.count())
     
-    print("Writing the dataset data to the City Blocks table.")
+    print("Step 5 | Load the dataset data to the City Blocks table.")
     write_to_db(df, "overwrite", "city_blocks")
 
     print("Inserting data into the City Blocks table completed!")
@@ -242,8 +199,10 @@ def insert_city_blocks_into_table(**kwargs):
 def insert_city_locations_into_table(**kwargs):
     print("Inserting data into the City Locations table...")
 
+    print("Step 1 | Get or create a Spark Session")
     spark = get_spark_session("MaxMind City Locations Dataset Inserter")
 
+    print("Step 2 | Extract the MaxMind City Locations dataset")
     df = spark \
         .read \
         .option("delimiter", ",") \
@@ -253,9 +212,11 @@ def insert_city_locations_into_table(**kwargs):
 
     df.printSchema()
     df.show(10, truncate = False)
+
+    print("Step 3 | Log the count of the DataFrame for data quality checks")
     kwargs['ti'].xcom_push(key='city_locations_count', value=df.count())
     
-    print("Writing the dataset data to the City Locations table.")
+    print("Step 4 | Load the dataset data to the City Locations table.")
     write_to_db(df, "overwrite", "city_locations")
 
     print("Inserting data into the City Locations table completed!")
@@ -274,13 +235,13 @@ def check_data_quality(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 3 | Checking number of rows from each table")
-    cursor.execute(count_select.format("asn"))
+    cursor.execute(count_select_maxmind.format("asn"))
     db_asn_count = cursor.fetchone()
 
-    cursor.execute(count_select.format("city_blocks"))
+    cursor.execute(count_select_maxmind.format("city_blocks"))
     db_city_blocks_count = cursor.fetchone()
 
-    cursor.execute(count_select.format("city_locations"))
+    cursor.execute(count_select_maxmind.format("city_locations"))
     db_city_locations_count = cursor.fetchone()
 
     print("Step 4 | Confirm data quality")

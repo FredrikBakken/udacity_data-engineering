@@ -34,8 +34,8 @@ def check_if_dataset_exist(**kwargs):
 
     iot23_exists = os.path.exists(path_cleaned_dataset)
 
-    #if (not iot23_exists):
-    #    raise ValueError("ERROR! The cleaned IoT-23 dataset does not exist...")
+    if (not iot23_exists):
+        raise ValueError("ERROR! The cleaned IoT-23 dataset does not exist...")
 
     print("Checking if the cleaned IoT-23 dataset exist completed!")
 
@@ -47,21 +47,7 @@ def create_originate_packets_table(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
-    cursor.execute(
-        create_table.format("originate_packets",
-            """
-            uid         VARCHAR NOT NULL UNIQUE,
-            host        VARCHAR,
-            port        INTEGER,
-            bytes       VARCHAR,
-            local       VARCHAR,
-            packets     INTEGER,
-            ip_bytes    INTEGER,
-            insert_date VARCHAR NOT NULL,
-            PRIMARY KEY (uid)
-            """
-        )
-    )
+    cursor.execute(create_table_originate_packets)
     connection.commit()
 
     print("Step 3 | Closing connection")
@@ -78,21 +64,7 @@ def create_response_packets_table(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
-    cursor.execute(
-        create_table.format("response_packets",
-            """
-            uid         VARCHAR NOT NULL UNIQUE,
-            host        VARCHAR,
-            port        INTEGER,
-            bytes       VARCHAR,
-            local       VARCHAR,
-            packets     INTEGER,
-            ip_bytes    INTEGER,
-            insert_date VARCHAR NOT NULL,
-            PRIMARY KEY (uid)
-            """
-        )
-    )
+    cursor.execute(create_table_response_packets)
     connection.commit()
 
     print("Step 3 | Closing connection")
@@ -109,27 +81,7 @@ def create_packets_table(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 2 | Executing create table query")
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS packets (
-            timestamp VARCHAR,
-            uid VARCHAR NOT NULL UNIQUE,
-            originate_network_id VARCHAR,
-            response_network_id VARCHAR,
-            protocol VARCHAR,
-            service VARCHAR,
-            duration VARCHAR,
-            connection_state VARCHAR,
-            missed_bytes INTEGER,
-            history VARCHAR,
-            tunnel_parents VARCHAR,
-            label VARCHAR,
-            detailed_label VARCHAR,
-            insert_date VARCHAR NOT NULL,
-            PRIMARY KEY (uid)
-        );
-        """
-    )
+    cursor.execute(create_table_packets)
     connection.commit()
 
     print("Step 3 | Closing connection")
@@ -322,27 +274,14 @@ def check_data_quality(**kwargs):
     connection, cursor = establish_connection()
 
     print("Step 3 | Checking number of rows from each table")
-    q1 = "SELECT count(*) FROM originate_packets WHERE insert_date = '{}';".format(ds)
-    print(q1)
-    cursor.execute(q1)
+    cursor.execute(count_select_iot23.format("originate_packets", ds))
     db_originate_packets_count = cursor.fetchone()
 
-    q2 = "SELECT count(*) FROM response_packets WHERE insert_date = '{}';".format(ds)
-    print(q2)
-    cursor.execute(q2)
+    cursor.execute(count_select_iot23.format("response_packets", ds))
     db_response_packets_count = cursor.fetchone()
 
-    q3 = "SELECT count(*) FROM packets WHERE insert_date = '{}';".format(ds)
-    print(q3)
-    cursor.execute(q3)
+    cursor.execute(count_select_iot23.format("packets", ds))
     db_packets_count = cursor.fetchone()
-
-    print(df_originate_packets_count)
-    print(db_originate_packets_count)
-    print(df_response_packets_count)
-    print(db_response_packets_count)
-    print(df_packets_count)
-    print(db_packets_count)
 
     print("Step 4 | Confirm data quality")
     if (df_originate_packets_count != db_originate_packets_count[0] or df_response_packets_count != db_response_packets_count[0] or df_packets_count != db_packets_count[0]):

@@ -53,6 +53,14 @@ packet_schema = StructType([
 ])
 
 
+# Define schema for MaxMind ASN
+asn_schema = StructType([
+    StructField("network", StringType(), False),
+    StructField("autonomous_system_number", IntegerType(), False),
+    StructField("autonomous_system_organization", StringType(), False),
+])
+
+
 # Define schema for the MaxMind City Blocks dataset
 city_blocks_schema = StructType([
     StructField("network", StringType(), False),
