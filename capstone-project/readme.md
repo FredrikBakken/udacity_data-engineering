@@ -104,6 +104,11 @@ Three data pipelines are defined for this project and each of them has its own A
 
 # Get Started
 
+## Hardware Requirements
+The following hardware requirements has to be fulfilled to run this project:
+ - 130GB free disk space (150GB recommended)
+ - 8GB of RAM (16GB recommended)
+
 ## Preliminary Steps
 This capstone project is designed to be executable on all platforms by taking advantage of Docker containers and thus requires the user to follow these prelimiary steps:
 
@@ -191,7 +196,26 @@ The second application is the Apache Airflow, which controls the engineering pro
 ## Running the Applications
 
 ### Data Engineering
-...
+Open the Apache Airflow UI by going to your browser and accessing the URL [http://172.28.1.1:8080/](http://172.28.1.1:8080/). This page will provide you with the following three DAGs *step-1_data-cleaner*, *step2_maxmind-dataset*, and *step-3_iot-23-dataset*.
+
+**BE AWARE:** The first DAG (step 1) has to finish before the third DAG (step 3) is started, this is base the first DAG is cleaning the dataset that is to be processed in the third DAG. The second DAG (step 2) can be executed simultaneously as both the first and third DAG.
+
+#### Data Cleaner
+The Data Cleaner DAG is the initial step for cleaning the raw IoT-23 dataset. More information about this can be found [here](https://github.com/FredrikBakken/udacity_data-engineering/tree/master/capstone-project#data-cleaning).
+
+#### MaxMind Dataset
+The MaxMind Dataset DAG is designed for dropping, creating, and inserting data into the MaxMind tables in the Postgres Data Warehouse. It uses an ETL-process for extracting data from the dataset files, transforming the data to fit the storage tables, and then loads the data into the database. The image below gives a graph view of how the DAG is constructed:
+
+![MaxMind Dataset Graph View](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/maxmind-dataset.png)
+
+#### IoT-23 Dataset
+The IoT-23 Dataset DAG is designed for dropping, creating, and inserting data into the IoT-23 packet tables in the Postgres Data Warehouse. It uses an ETL-process for extracting data from the dataset files, transforming the data to fit the storage tables, and then loads the data into the database. The image below gives a graph view of how the DAG is constructed:
+
+![IoT-23 Dataset Graph View](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/iot23-dataset.png)
+
+The DAG is running within a selected timeframe with the start date set to 09.05.2018 and an end date set to 22.09.2019. It is also following a daily schedule, where it runs the DAG at 23:59 every day. The image below gives a tree view of how the DAG is being executed:
+
+![IoT-23 Dataset Tree View](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/iot23-dag-execution.png)
 
 ### Data Analytics
 ...
@@ -212,10 +236,10 @@ docker rmi -f $(docker images -a -q)
 ## Questions & Answers
 1. **What's the goal?**<br/>...<br/><br/>
 2. **What queries will you want to run?**<br/>...<br/><br/>
-3. **How would Spark or Airflow be incorporated?**<br/>...<br/><br/>
+3. **How would Spark or Airflow be incorporated?**<br/>Apache Spark and Apache Airflow are already incorporated into the project.<br/><br/>
 4. **Why did you choose the model you chose?**<br/>...<br/><br/>
 5. **State the rationale for the choice of tools and technologies for the project.**<br/>...<br/><br/>
-6. **How often the data should be updated and why?**<br/>...
+6. **How often the data should be updated and why?**<br/>The current project application updates the data on a daily basis for the IoT-23 dataset by fetching the new data partition that is generated for each day. It could also include a weekly scheduled update of the MaxMind data, since these are updated every Wednesday by MaxMind.
 
 ## Scenarios
 How would you approach the problem differently under the following scenarios?
