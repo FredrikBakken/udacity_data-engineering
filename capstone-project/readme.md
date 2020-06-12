@@ -88,13 +88,16 @@ The data model that is used for this project can be represented by a [snowflake 
 
 ![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 
-## Data Pipeline
+## Data Pipelines
 Three data pipelines are defined for this project and each of them has its own Apache Airflow workflow.
 
+### Data Cleaner
 ![Pipeline: Data Cleaner](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_data-cleaner.png)
 
+### MaxMind Dataset
 ![Pipeline: MaxMind Dataset](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_maxmind.png)
 
+### IoT-23 Dataset
 ![Pipeline: IoT-23 Dataset](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_iot23.png)
 
 # Step 4 | Run ETL to Model the Data
