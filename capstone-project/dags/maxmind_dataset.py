@@ -341,10 +341,11 @@ task_create_asn_table >> task_insert_asn_into_table
 task_insert_asn_into_table >> task_check_data_quality
 
 task_check_if_datasets_exist >> task_drop_city_blocks_table
-task_drop_city_blocks_table >> task_drop_city_locations_table
-task_drop_city_locations_table >> task_create_city_locations_table
-task_create_city_locations_table >> task_create_city_blocks_table
+task_drop_city_blocks_table >> task_create_city_blocks_table
 task_create_city_blocks_table >> task_insert_city_blocks_into_table
-task_create_city_blocks_table >> task_insert_city_locations_into_table
 task_insert_city_blocks_into_table >> task_check_data_quality
+
+task_check_if_datasets_exist >> task_drop_city_locations_table
+task_drop_city_locations_table >> task_create_city_locations_table
+task_create_city_locations_table >> task_insert_city_locations_into_table
 task_insert_city_locations_into_table >> task_check_data_quality

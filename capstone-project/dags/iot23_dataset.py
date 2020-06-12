@@ -23,6 +23,7 @@ dag = DAG(
     default_args=get_arguments(datetime(2018, 5, 9)),
     description='DAG for putting the IoT-23 dataset into Postgres tables.',
     schedule_interval="59 23 * * *",
+    end_date=datetime(2019, 9, 22)
 )
 
 

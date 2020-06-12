@@ -8,10 +8,16 @@ In this project, you can choose to complete the project provided for you, or def
 # Step 1 | Scope the Project and Gather Data
 
 ## Scope of the Project
-The capstone project for my journey through the [Udacity Data Engineering](https://www.udacity.com/course/data-engineer-nanodegree--nd027) course looks into creating a data pipeline by using the IoT-23 dataset by Stratosphere Laboratory and enriching the dataset with IP related information from two other datasets, *ASN* ([autonomous system number](https://en.wikipedia.org/wiki/Autonomous_system_(Internet))) and *City*, by MaxMind. It is built using a Docker container environment for simple scaling and deployment to *any* platform.
+The capstone project for my journey throughout the [Udacity Data Engineering](https://www.udacity.com/course/data-engineer-nanodegree--nd027) course looks into creating a data pipeline by using the IoT-23 dataset by Stratosphere Laboratory and enriching the dataset with network related information from three other datasets, *ASN* ([autonomous system number](https://en.wikipedia.org/wiki/Autonomous_system_(Internet))), *City Blocks*, and *City Locations* by MaxMind.
+
+It is to be built by using a Docker container environment for simple scaling and deployment to *any* platform. The following containers will be constructed for handling each part of the project:
+
+- **Data Engineering** | This container will handle the ETL-processes of extracting, transforming, and loading the cleaned data in the data warehouse. It will be designed to use Apache Airflow for managing the workflows and Apache Spark for handling the datasets. The container will be built upon the [puckel/docker-airflow:1.10.9](https://hub.docker.com/r/puckel/docker-airflow/dockerfile) docker container and then extended with the installation of Apache Spark and to download of the datasets required in the project.
+- **Data Warehouse** | This container will function as the storage for the cleaned data extracted from the datasets. It is to be handled by the [postgres:latest](https://hub.docker.com/layers/postgres/library/postgres/latest/images/sha256-45bbfe24861756fa1406f8f7942892510b66374e1e25ae758eea49e6ab7725a3) docker container.
+- **Visual Analytics** | This container will function as the quality assurance and analytics container for the project. It will be designed to handle queries towards the data warehouse and visualize the results for the user in Jupyter Notebooks. The container that is to be used is the [jupyter/datascience-notebook](https://hub.docker.com/r/jupyter/datascience-notebook).
 
 ## Datasets
-This project looks into engineering data from the [IoT-23 dataset](https://www.stratosphereips.org/datasets-iot23), *a labeled dataset with malicious and benign IoT network traffic*, and two support datasets from MaxMind's [GeoIP2 databases](https://dev.maxmind.com/geoip/geoip2/geolite2/), with correlated IP-information about geographical locations and ASNs.
+This project looks into engineering data from the [IoT-23 dataset](https://www.stratosphereips.org/datasets-iot23), *a labeled dataset with malicious and benign IoT network traffic*, and three support datasets from MaxMind's [GeoIP2 databases](https://dev.maxmind.com/geoip/geoip2/geolite2/), with correlated IP network information about geographical locations and ASNs.
 
 1. The IoT-23 dataset is used as the baseline for this project, which includes PCAP-data with attached labels that describes the corresponding malware or benign information. In total the dataset contains 764,308,000 packets that has been captured between 9th of May 2018 to 21st of September 2019.
 
@@ -61,9 +67,9 @@ The **MaxMind ASN dataset** contains a CSV file with information about network (
 The **MaxMind City dataset** contains two CSV files, the first containing the IPv4-blocks and geolocations, and the second containing support information such as continent, country, city name, and time zone. They contain a descriptive header and multiple structured columns with data, which will be used to enrich the IoT-23 dataset.
 
 ## Data Cleaning
-From the data exploration phase, it is clear that the data found in the IoT-23 dataset needs to be cleaned by removing the commented lines. Since this dataset also includes network captures from IoT devices over a time periode, it is possible to use the timestamp value found in the `ts` column to split the dataset by days. This makes it possible for us to simulate a summary of daily packets, which can be processed by a daily schedule using Apache Airflow.
+From the data exploration phase, it is clear that the data found in the IoT-23 dataset needs to be cleaned by removing the commented lines. Since this dataset also includes network captures from IoT devices over a time periode, it is possible to use the timestamp value found in the `ts` column to split the dataset by day. This makes it possible for us to simulate a summary of daily packets, which can be processed by a daily schedule using Apache Airflow.
 
-An [Airflow DAG](https://airflow.apache.org/docs/stable/concepts.html#dags) is therefore set up to handle the cleaning of the IoT-23 dataset, named **step-1_data-cleaner** (found in the dags/data_cleaner.py file). This DAG consists of five tasks that cleans and prepares the dataset:
+An [Airflow DAG](https://airflow.apache.org/docs/stable/concepts.html#dags) is therefore set up to handle the cleaning of the IoT-23 dataset, named **step-1_data-cleaner** (found in the [dags/data_cleaner.py](https://github.com/FredrikBakken/udacity_data-engineering/blob/master/capstone-project/dags/data_cleaner.py) file). This DAG consists of five tasks that cleans and prepares the dataset:
 
 ![Data Cleaning DAG](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-cleaner.png)
 
@@ -83,7 +89,13 @@ The data model that is used for this project can be represented by a [snowflake 
 ![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 
 ## Data Pipeline
-...
+Three data pipelines are defined for this project and each of them has its own Apache Airflow workflow.
+
+![Pipeline: Data Cleaner](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_data-cleaner.png)
+
+![Pipeline: MaxMind Dataset](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_maxmind.png)
+
+![Pipeline: IoT-23 Dataset](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/pipeline_iot23.png)
 
 # Step 4 | Run ETL to Model the Data
 
@@ -170,7 +182,7 @@ After finding the *NETWORK ID* for the **capstone-project_udacity_network**, use
 }
 ```
 
-The second application is the Apache Airflow, which controls the engineering processes in the project. This application accessible through the port 8080, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL [http://172.28.1.1:8080/](http://172.28.1.1:8080/).
+The second application is the Apache Airflow, which controls the engineering processes in the project. This application is accessible through the 8080 port, where the host can be found in the *IPv4Address*-field of the **data-engineering** container. In this case, the Apache Airflow application can be access by opening your favorite browser on the URL [http://172.28.1.1:8080/](http://172.28.1.1:8080/).
 
 
 ## Running the Applications
