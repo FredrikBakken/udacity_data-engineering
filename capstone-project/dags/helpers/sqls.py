@@ -2,6 +2,7 @@
 drop_table = "DROP TABLE IF EXISTS {};"
 count_select_maxmind = "SELECT count(*) FROM {};"
 count_select_iot23 = "SELECT count(*) FROM {} WHERE insert_date = '{}';"
+create_patition_table = "CREATE TABLE {} PARTITION OF {} FOR VALUES FROM ('{}') TO ('{}');"
 
 create_table_asn = """
 CREATE TABLE IF NOT EXISTS asn (
@@ -52,36 +53,36 @@ CREATE TABLE IF NOT EXISTS city_blocks (
 
 create_table_originate_packets = """
 CREATE TABLE IF NOT EXISTS originate_packets (
-    uid                             VARCHAR NOT NULL UNIQUE,
+    uid                             VARCHAR NOT NULL,
     host                            VARCHAR,
     port                            INTEGER,
     bytes                           VARCHAR,
     local                           VARCHAR,
     packets                         INTEGER,
     ip_bytes                        INTEGER,
-    insert_date                     VARCHAR NOT NULL,
-    PRIMARY KEY (uid)
-);
+    insert_date                     DATE NOT NULL,
+    PRIMARY KEY (uid, insert_date)
+) PARTITION BY RANGE (insert_date);
 """
 
 create_table_response_packets = """
 CREATE TABLE IF NOT EXISTS response_packets (
-    uid                             VARCHAR NOT NULL UNIQUE,
+    uid                             VARCHAR NOT NULL,
     host                            VARCHAR,
     port                            INTEGER,
     bytes                           VARCHAR,
     local                           VARCHAR,
     packets                         INTEGER,
     ip_bytes                        INTEGER,
-    insert_date                     VARCHAR NOT NULL,
-    PRIMARY KEY (uid)
-);
+    insert_date                     DATE NOT NULL,
+    PRIMARY KEY (uid, insert_date)
+) PARTITION BY RANGE (insert_date);
 """
 
 create_table_packets = """
 CREATE TABLE IF NOT EXISTS packets (
     timestamp                       VARCHAR,
-    uid                             VARCHAR NOT NULL UNIQUE,
+    uid                             VARCHAR NOT NULL,
     originate_network_id            VARCHAR,
     response_network_id             VARCHAR,
     protocol                        VARCHAR,
@@ -93,7 +94,7 @@ CREATE TABLE IF NOT EXISTS packets (
     tunnel_parents                  VARCHAR,
     label                           VARCHAR,
     detailed_label                  VARCHAR,
-    insert_date                     VARCHAR NOT NULL,
-    PRIMARY KEY (uid)
-);
+    insert_date                     DATE NOT NULL,
+    PRIMARY KEY (uid, insert_date)
+) PARTITION BY RANGE (insert_date);
 """

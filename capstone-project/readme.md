@@ -200,15 +200,15 @@ Open the Apache Airflow UI by going to your browser and accessing the URL [http:
 
 **BE AWARE:** The first DAG (step 1) has to finish before the third DAG (step 3) is started, this is base the first DAG is cleaning the dataset that is to be processed in the third DAG. The second DAG (step 2) can be executed simultaneously as both the first and third DAG.
 
-#### Data Cleaner
+#### Step 1 | Data Cleaner
 The Data Cleaner DAG is the initial step for cleaning the raw IoT-23 dataset. More information about this can be found [here](https://github.com/FredrikBakken/udacity_data-engineering/tree/master/capstone-project#data-cleaning).
 
-#### MaxMind Dataset
+#### Step 2 | MaxMind Dataset
 The MaxMind Dataset DAG is designed for dropping, creating, and inserting data into the MaxMind tables in the Postgres Data Warehouse. It uses an ETL-process for extracting data from the dataset files, transforming the data to fit the storage tables, and then loads the data into the database. The image below gives a graph view of how the DAG is constructed:
 
 ![MaxMind Dataset Graph View](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/maxmind-dataset.png)
 
-#### IoT-23 Dataset
+#### Step 3 | IoT-23 Dataset
 The IoT-23 Dataset DAG is designed for dropping, creating, and inserting data into the IoT-23 packet tables in the Postgres Data Warehouse. It uses an ETL-process for extracting data from the dataset files, transforming the data to fit the storage tables, and then loads the data into the database. The image below gives a graph view of how the DAG is constructed:
 
 ![IoT-23 Dataset Graph View](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/iot23-dataset.png)
@@ -223,7 +223,7 @@ The DAG is running within a selected timeframe with the start date set to 09.05.
 ## Cleaning Up
 Once the project has been successfully ran, one can clean up the cluttered files on the system by running the following commands in the terminal.
 
-**WARNING:** This will delete *ALL* Docker images and running containers on your system. DO NOT run these commands if there already exists Docker images/containers on your system which you want to keep.
+**WARNING:** This will delete *ALL* Docker images and running containers on your system. DO NOT run these commands if there already exist Docker images/containers on your system which you want to keep.
 
 ```
 docker stop $(docker ps -aq)
