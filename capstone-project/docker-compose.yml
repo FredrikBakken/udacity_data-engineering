@@ -16,6 +16,8 @@ services:
   datascience-notebook:
     container_name: visual-analytics
     image: jupyter/datascience-notebook
+    environment:
+      - JUPYTER_TOKEN=capstone
     volumes:
       - "./notebooks:/home/jovyan/notebooks"
     ports:

@@ -16,7 +16,7 @@ from helpers.sqls import *
 
 
 dag = DAG(
-    dag_id='step-2_maxmind-dataset',
+    dag_id='maxmind-dataset',
     default_args=get_arguments(days_ago(0)),
     description='DAG for putting the MaxMind datasets into Postgres tables.',
     schedule_interval=None,

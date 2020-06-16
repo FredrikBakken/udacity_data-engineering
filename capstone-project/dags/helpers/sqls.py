@@ -47,7 +47,12 @@ CREATE TABLE IF NOT EXISTS city_blocks (
     latitude                        FLOAT,
     longitude                       FLOAT,
     accuracy_radius                 INTEGER,
-    PRIMARY KEY (network_id)
+    PRIMARY KEY (
+        network_id,
+        geoname_id,
+        registered_country_geoname_id,
+        represented_country_geoname_id
+    )
 );
 """
 
@@ -95,6 +100,11 @@ CREATE TABLE IF NOT EXISTS packets (
     label                           VARCHAR,
     detailed_label                  VARCHAR,
     insert_date                     DATE NOT NULL,
-    PRIMARY KEY (uid, insert_date)
+    PRIMARY KEY (
+        uid,
+        originate_network_id,
+        response_network_id,
+        insert_date
+    )
 ) PARTITION BY RANGE (insert_date);
 """
