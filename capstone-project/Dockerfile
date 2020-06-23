@@ -51,9 +51,6 @@ ADD ./config/ /usr/local/airflow/config
 # Add DAGs to Airflow UI
 ADD ./dags/ /usr/local/airflow/dags
 
-# TODO: Remove
-#ADD ./datasets /usr/local/airflow/datasets
-
 # Add datasets to the project
 RUN mkdir /usr/local/airflow/datasets \
     && cd /usr/local/airflow/datasets \
