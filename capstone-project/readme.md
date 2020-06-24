@@ -219,11 +219,11 @@ docker rmi -f $(docker images -a -q)
 # Step 5 | Complete Project Write Up
 
 ## Questions & Answers
-1. **What's the goal?**<br/>...<br/><br/>
-2. **What queries will you want to run?**<br/>...<br/><br/>
+1. **What's the goal?**<br/>The goal of the project is to showcase what I have learned during the Udacity Data Engineering course by using my creativity to explore ways to engineer and analyze data from different sources. I also wanted to design the project so that I could get hands-on experience on as many of the technologies as possible from the course. In addition - it was more or less about playing with data and trying to see what would be possible.<br/><br/>
+2. **What queries will you want to run?**<br/>I wanted to run queries that confirmed that data quality such as finding the name of the partition tables, the number of rows in each table, and confirm that JOINs were possible. For the analysis part, I wanted to execute queries that would use the network information together with location data and asn data.</br></br>During this testing I found that JOIN-aggregations required a lot of disk space if they were executed directly towards the database with SQL. My solution was therefore to load the data into Pandas dataframes and merge the dataframes directly, since this would use the memory instead of actual disk space on my local machine.<br/><br/>
 3. **How would Spark or Airflow be incorporated?**<br/>Apache Spark and Apache Airflow are already incorporated into the project.<br/><br/>
-4. **Why did you choose the model you chose?**<br/>...<br/><br/>
-5. **State the rationale for the choice of tools and technologies for the project.**<br/>...<br/><br/>
+4. **Why did you choose the model you chose?**<br/>I chose to use a snowflake schema approach for the database tables since the city_blocks table included multiple geoname_id columns. This could potentially result in there having to be multiple rows of the city_locations table added to the city_blocks table.<br/><br/>
+5. **State the rationale for the choice of tools and technologies for the project.**<br/>The choice of tools and technologies were selected since they were taught in the course. I added the use of Docker, since I wanted to learn how docker containers work.<br/><br/>
 6. **How often the data should be updated and why?**<br/>The current project application updates the data on a daily basis for the IoT-23 dataset by fetching the new data partition that is generated for each day. It could also include a weekly scheduled update of the MaxMind data, since these are updated every Wednesday by MaxMind.
 
 ## Scenarios
