@@ -229,6 +229,6 @@ docker rmi -f $(docker images -a -q)
 ## Scenarios
 How would you approach the problem differently under the following scenarios?
 
-1. **If the data was increased by 100x.**<br/>In case where the total amount of data is increased by 100x, it would be necessary to increase the total amount of disk space and increase the number of workers. This can be done by running the project/application in a cluster environment (e.g. AWS, Azure, Google Cloud, or a self-configured Hadoop cluster) with multiple worker nodes and more disks for storage.<br/><br/>
+1. **If the data was increased by 100x.**<br/>In case where the total amount of data is increased by 100x, it would be necessary to increase the total amount of disk space and increase the number of workers. This can be done by running the project in a cluster environment (e.g. AWS, Azure, Google Cloud, or a self-configured Hadoop cluster) with multiple worker nodes and more disks for storage.<br/><br/>
 2. **If the pipelines were run on a daily basis by 7am.**<br/>The current IoT-23 pipeline is configured to run on a daily scheduled interval at 23:59. This pipeline just has to be updated to run at 07:00 instead.<br/><br/>
 3. **If the database needed to be accessed by 100+ people.**<br/>In the case where the database has to be accessed by 100+ people, it would require that the **Data Warehouse** container is depolyed in a shared environment which can be accessed by multiple people. This can be done by e.g. having a shared Redshift data warehouse.
