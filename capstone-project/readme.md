@@ -192,16 +192,18 @@ The DAG is running within a selected timeframe with the start date set to 09.05.
 Open the Jupyter Notebook UI by going to your browser and accessing the URL [http://localhost:8888/tree?token=capstone](http://localhost:8888/tree?token=capstone). This page will provide you with two directories. Go the the `notebooks` directory to find the `Data Analysis` and `Data Quality` notebooks.
 
 #### Data Quality
-...
+The [Data Quality Notebook](https://github.com/FredrikBakken/udacity_data-engineering/blob/master/capstone-project/notebooks/Data%20Quality.ipynb) is used to run simple queries towards the packet tables to ensure that the partitions exist, the same number of rows exist, and that JOIN aggregations are possible.
 
 #### Data Analysis
-...
+The [Data Analysis Notebook](https://github.com/FredrikBakken/udacity_data-engineering/blob/master/capstone-project/notebooks/Data%20Analysis.ipynb) is used to analyse the data found in the `28_5_20`-partition (other options are also available). It JOINs data from all the tables in order to visualize the origin of all the packets sent from the response network column, as illustrated below:
 
 ![World Map | All Packets](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/world-map_all-packets.png)
 
-...
+It also filters on all packets categorized as "Attack" in order to visualize the origin of all the attack locations from the response network column, as illustrated below:
 
 ![World Map | Attack Packets](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/world-map_attack-packets.png)
+
+Finally, it shows the autonomous system organization count for the "Attack"-labeled packets.
 
 ## Cleaning Up
 Once the project has been successfully ran, one can clean up the cluttered files on the system by running the following commands in the terminal.
