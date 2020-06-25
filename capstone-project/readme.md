@@ -76,6 +76,70 @@ The data model that is used for this project can be represented by a [snowflake 
 
 ![Data Model](https://raw.githubusercontent.com/FredrikBakken/udacity_data-engineering/master/assets/imgs/data-model.png)
 
+### Data Dictionary
+
+| Table             | Term                           | Data Type  | Example                    |
+| ----------------- | ------------------------------ | ---------- | -------------------------- |
+| Packets           | timestamp                      | VARCHAR    | 1526774401                 |
+| Packets           | uid                            | VARCHAR PK | C5e1a23koG8ZxeqDf4         |
+| Packets           | originate_network_id           | VARCHAR PK | 192.168.2                  |
+| Packets           | response_network_id            | VARCHAR PK | 31.202.212                 |
+| Packets           | protocol                       | VARCHAR    | tcp                        |
+| Packets           | service                        | VARCHAR    | -                          |
+| Packets           | duration                       | VARCHAR    | 2.999712                   |
+| Packets           | connection_state               | VARCHAR    | S0                         |
+| Packets           | missed_bytes                   | INTEGER    | 0                          |
+| Packets           | history                        | VARCHAR    | S                          |
+| Packets           | tunnel_parents                 | VARCHAR    | (empty)                    |
+| Packets           | label                          | VARCHAR    | Malicious                  |
+| Packets           | detailed_label                 | VARCHAR    | PartOfAHorizontalPortScan  |
+| Packets           | insert_date                    | DATE       | datetime.date(2018, 7, 25) |
+| Originate Packets | uid                            | VARCHAR PK | C5e1a23koG8ZxeqDf4         |
+| Originate Packets | host                           | VARCHAR    | 195.189.68.85              |
+| Originate Packets | port                           | INTEGER    | 81                         |
+| Originate Packets | bytes                          | VARCHAR    | -                          |
+| Originate Packets | local                          | VARCHAR    | -                          |
+| Originate Packets | packets                        | INTEGER    | 0                          |
+| Originate Packets | ip_bytes                       | INTEGER    | 0                          |
+| Originate Packets | insert_date                    | DATE       | datetime.date(2018, 7, 25) |
+| Response Packets  | uid                            | VARCHAR PK | C5e1a23koG8ZxeqDf4         |
+| Response Packets  | host                           | VARCHAR    | 31.202.212.253             |
+| Response Packets  | port                           | INTEGER    | 22                         |
+| Response Packets  | bytes                          | VARCHAR    | -                          |
+| Response Packets  | local                          | VARCHAR    | -                          |
+| Response Packets  | packets                        | INTEGER    | 0                          |
+| Response Packets  | ip_bytes                       | INTEGER    | 0                          |
+| Response Packets  | insert_date                    | DATE       | datetime.date(2018, 7, 25) |
+| ASN               | network_id                     | VARCHAR PK | 1.0.0                      |
+| ASN               | network                        | VARCHAR    | 1.0.0.0/24                 |
+| ASN               | autonomous_system_number       | INTEGER    | 13335                      |
+| ASN               | autonomous_system_organization | VARCHAR    | CLOUDFLARENET              |
+| City Blocks       | network_id                     | VARCHAR PK | 195.189.66                 |
+| City Blocks       | network                        | VARCHAR    | 195.189.66.0/23            |
+| City Blocks       | geoname_id                     | INTEGER    | 2970275                    |
+| City Blocks       | registered_country_geoname_id  | INTEGER    | 3017382                    |
+| City Blocks       | represented_country_geoname_id | INTEGER    | NaN                        |
+| City Blocks       | is_anonymous_proxy             | INTEGER    | 0                          |
+| City Blocks       | is_satellite_provider          | INTEGER    | 0                          |
+| City Blocks       | postal_code                    | VARCHAR    | 42340                      |
+| City Blocks       | latitude                       | FLOAT      | 45.5629                    |
+| City Blocks       | longitude                      | FLOAT      | 4.2903                     |
+| City Blocks       | accuracy_radius                | INTEGER    | 50                         |
+| City Locations    | geoname_id                     | INTEGER PK | 5819                       |
+| City Locations    | locale_code                    | VARCHAR    | en                         |
+| City Locations    | continent_code                 | VARCHAR    | EU                         |
+| City Locations    | continent_name                 | VARCHAR    | Europe                     |
+| City Locations    | country_iso_code               | VARCHAR    | CY                         |
+| City Locations    | country_name                   | VARCHAR    | Cyprus                     |
+| City Locations    | subdivision_1_iso_code         | VARCHAR    | 02                         |
+| City Locations    | subdivision_1_name             | VARCHAR    | Limassol                   |
+| City Locations    | subdivision_2_iso_code         | VARCHAR    | None                       |
+| City Locations    | subdivision_2_name             | VARCHAR    | None                       |
+| City Locations    | city_name                      | VARCHAR    | Souni                      |
+| City Locations    | metro_code                     | VARCHAR    | None                       |
+| City Locations    | time_zone                      | VARCHAR    | Asia/Nicosia               |
+| City Locations    | is_in_european_union           | INTEGER    | 1                          |
+
 ## Data Pipelines
 Two data pipelines are defined for this project and each of them has its own Apache Airflow DAG.
 
@@ -223,7 +287,7 @@ docker rmi -f $(docker images -a -q)
 2. **What queries will you want to run?**<br/>I wanted to run queries that confirmed that data quality such as finding the name of the partition tables, the number of rows in each table, and confirm that JOINs were possible. For the analysis part, I wanted to execute queries that would use the network information together with location data and asn data.</br></br>During this testing I found that JOIN-aggregations required a lot of disk space if they were executed directly towards the database with SQL. My solution was therefore to load the data into Pandas dataframes and merge the dataframes directly, since this would use the memory instead of actual disk space on my local machine.<br/><br/>
 3. **How would Spark or Airflow be incorporated?**<br/>Apache Spark and Apache Airflow are already incorporated into the project.<br/><br/>
 4. **Why did you choose the model you chose?**<br/>I chose to use a snowflake schema approach for the database tables since the city_blocks table included multiple geoname_id columns. This could potentially result in there having to be multiple rows of the city_locations table added to the city_blocks table.<br/><br/>
-5. **State the rationale for the choice of tools and technologies for the project.**<br/>The choice of tools and technologies were selected since they were taught in the course. I added the use of Docker, since I wanted to learn how docker containers work.<br/><br/>
+5. **State the rationale for the choice of tools and technologies for the project.**<br/>The selection of tools and technologies for the project were based on the requirements set for the project. It requires daily processing, where Apache Airflow is perfect for settings up scheduled workflow. Apache Spark (with Python) is perfect for running ETL-processes on large amounts of data (both in cluster and local mode). As an alternative, Scala could have been used instead of Python since Apache Spark is developed in Scala ([to achieve native performance](https://www.simplilearn.com/scala-vs-python-article)).</br></br>PostgreSQL was selected as the database technology, since it is easy to scale with larger amounts of data by dynamically adding partitions. With even larger amounts of data, database technologies such as [Apache Hive](https://hive.apache.org/) (for [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing) cases) or [Apache HBase](https://hbase.apache.org/) (for [OLTP](https://en.wikipedia.org/wiki/Online_transaction_processing) cases) could be used.</br></br>Jupyter Notebook was selected for the data quality and data analysis parts since it is a practical tool for performing visualization of the results.</br></br>I also added the use of Docker, since I wanted to learn and get hands-on experience with how docker containers work.<br/><br/>
 6. **How often the data should be updated and why?**<br/>The current project application updates the data on a daily basis for the IoT-23 dataset by fetching the new data partition that is generated for each day. It could also include a weekly scheduled update of the MaxMind data, since these are updated every Wednesday by MaxMind.
 
 ## Scenarios
